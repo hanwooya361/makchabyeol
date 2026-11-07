@@ -2,6 +2,12 @@
 
 각 작업 끝에 무엇을 왜 했는지 3줄로 남겨요. 최신 항목이 위로 와요.
 
+## 2026-11-07 · VS Code Gradle import가 Java 25를 잡는 문제
+
+- VS Code가 "Can't use Java 25.0.4.1 and Gradle 8.14.3"로 import를 거부함. 범인은 설치한 JDK가 아니라 **Red Hat Java 확장에 딸려 오는 번들 JRE**(`~/.vscode/extensions/redhat.java-1.58.0-win32-x64/jre/25.0.4.1`)였음. 확장이 그걸로 Gradle 데몬을 띄우는데 Gradle 8.14.3이 Java 25를 모름. 터미널 `gradlew.bat`은 JAVA_HOME(17) 데몬 + toolchain 21로 멀쩡히 돌고 있었으므로 깨진 건 IDE 쪽 하나뿐이었음
+- Gradle을 9로 올리는 선택지는 버림. toolchain이 어차피 21이라 Java 25를 데몬으로 써서 얻는 게 없고, 원인(데몬 JVM이 프로젝트 기준과 다름)도 안 고치면서 Spring Boot 플러그인 호환만 다시 봐야 함. 대신 Temurin JDK 21.0.13을 정식 설치하고(`C:\Program Files\Eclipse Adoptium\jdk-21.0.13.9-hotspot`) VS Code가 그걸 보게 함
+- 설정은 **`.vscode/settings.json`(작업 영역)에만** 넣음. `JAVA_HOME`은 17 그대로 둬서 수업 프로젝트에 영향 없음. 주의: `.vscode/`는 .gitignore에 있어 이 파일은 커밋되지 않음 — 다른 PC에서 클론하면 같은 알림이 다시 뜨고, 그때 이 항목을 보고 다시 만들면 됨. `gradlew.bat test --rerun-tasks` BUILD SUCCESSFUL 확인
+
 ## 2026-11-07 · T03 카드 찍기(로컬)
 
 - 밤 날짜(`lib/night.js`)는 "정오를 자정으로 12시간 당긴 뒤 날짜만 떼는" 한 줄 계산으로 만듦. `getHours` 같은 로컬 시간대 함수를 한 번도 안 써서 해외 접속에서도 한국 밤 날짜가 나옴. 테스트는 Node v24 내장 `node --test`로 돌림 — 순수 함수라 Vitest(패키지 40개)를 붙일 이유가 없었음. 정오 경계·자정 넘김·시간대·연말 6케이스 통과
