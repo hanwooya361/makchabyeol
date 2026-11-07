@@ -1,0 +1,70 @@
+/* 팔레트와 기본 레이아웃. 값의 근거는 docs/screen-design.md 4장 */
+:root {
+  --night-sky: #0e1530;
+  --stop-shadow: #1f2a44;
+  --lamp-light: #f6c76b;
+  --star-light: #fff4d6;
+  --reader-green: #5fd39a;
+
+  --stage-max-width: 480px;
+
+  color: var(--star-light);
+  background: var(--night-sky);
+  font-family:
+    "Pretendard",
+    system-ui,
+    -apple-system,
+    "Apple SD Gothic Neo",
+    "Malgun Gothic",
+    sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+.stage {
+  max-width: var(--stage-max-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.scene {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.placeholder {
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+}
+
+.footer {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.footer a {
+  color: var(--star-light);
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

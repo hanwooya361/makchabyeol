@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: makchabyeol
+  profiles:
+    default: local
+  jpa:
+    open-in-view: false
+
+app:
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
+
+---
+# 로컬 개발: H2 메모리 DB (PostgreSQL 호환 모드). 서버를 끄면 데이터가 사라진다.
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:h2:mem:makchabyeol;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+
+---
+# 배포: Neon PostgreSQL. 접속 정보는 환경변수로만 받는다.
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
