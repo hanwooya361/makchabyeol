@@ -1,4 +1,4 @@
-import "../styles/stop.css";
+import "./Stop.css";
 
 // S1 정류장. 실루엣은 장식이라 SVG를 통째로 aria-hidden 하고,
 // 읽어야 하는 글자는 모두 HTML로 올린다(대비·글자 크기 조절·스크린리더).

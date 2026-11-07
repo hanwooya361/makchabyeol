@@ -211,12 +211,12 @@ makchabyeol/
 │   └── src/
 │       ├── main.jsx
 │       ├── App.jsx           # scene 상태로 S1~S3 전환
-│       ├── scenes/           # Stop.jsx, Sky.jsx, Ending.jsx (그리는 코드만, 8장 참고)
-│       ├── components/       # CardReader, StarField, HelpCard, Footer
+│       ├── scenes/           # Stop.jsx + Stop.css 처럼 장면과 그 스타일을 한 묶음으로. 그리는 코드만 (8장)
+│       ├── components/       # CardReader, StarField, HelpCard, Footer — 장면 공통 UI, 3D에서도 HTML
 │       ├── safety/           # crisis.js (키워드 감지)
 │       ├── api/              # client.js (fetch, 타임아웃, 재시도)
 │       ├── lib/              # visitor.js (익명 ID), night.js (밤 날짜)
-│       └── styles/
+│       └── styles/           # global.css(팔레트·전역 레이아웃)만. 장면별 CSS는 scenes/에
 └── backend/                  # Spring Boot 3, Java 21, Gradle
     ├── build.gradle
     └── src/main/java/com/makchabyeol/
@@ -275,8 +275,11 @@ Should 기능(후원 링크, 별자리, 공유 이미지, 운영비 페이지, �
 
 | | 어디에 | 무엇이 | 3D 전환 때 |
 | --- | --- | --- | --- |
-| 그리는 코드 | `scenes/` | 정류장·하늘·마무리 장면, 애니메이션, 레이아웃 | **통째로 교체** |
+| 그리는 코드 | `scenes/` | 정류장·하늘·마무리 장면, 애니메이션, 레이아웃, 그 장면 전용 CSS | **통째로 교체** |
+| 장면 공통 UI | `App.jsx`, `components/` | 푸터, 위기 안내 카드처럼 모든 장면에 걸리는 것 | **HTML 그대로 둠** |
 | 의식 로직 | `lib/`, `safety/`, `api/`, `App.jsx` | 밤 날짜 계산, 익명 ID, 위기 키워드 감지, API 호출, 어느 장면인지(`scene` 상태), 카드를 찍었는지, 입력한 글 | **그대로 둠** |
+
+장면별 CSS는 `styles/`가 아니라 장면 옆에 둬요(`scenes/Stop.jsx` + `scenes/Stop.css`). 같이 버려질 파일이니 같이 모여 있는 게 맞아요. `styles/`에는 팔레트와 전역 레이아웃(`global.css`)만 남겨요.
 
 장면 컴포넌트는 "받은 값을 그리고, 사용자가 뭘 했는지 콜백으로 알린다"까지만 해요. 예를 들어 `Stop`은 카드를 찍었는지 여부를 `props`로 받고, 단말기를 누르면 `onCardTap()`을 부르기만 해요. 오늘 이미 찍었는지 판단하는 건 `lib/night.js`와 `App.jsx`의 몫이에요.
 
@@ -307,6 +310,12 @@ App.jsx
 T02에서 SVG 실루엣을 `aria-hidden`으로 묶고 읽어야 하는 글자를 HTML로 올린 것과 **같은 방식을 3D에서도 써요.** `<canvas>` 안에는 DOM이 없어서 스크린리더가 읽을 것도, 글자 크기 조절이 먹힐 것도 없어요. 전광판·안내·버튼은 캔버스 위에 HTML로 얹고, 캔버스는 장식으로 둬요.
 
 덕분에 접근성 작업(T13)의 결과물이 3D 전환 뒤에도 그대로 살아남아요.
+
+### 전환 작업의 첫 단계: 카피 뽑기
+
+2D 장면 안에는 카피가 문자열로 박혀 있어요("막차까지 ∞분", "카드를 대 주세요" 같은). MVP 동안은 쓰는 곳이 한 군데라 그대로 둬도 괜찮지만, **3D 장면을 만드는 순간 2D·3D 양쪽에 같은 문장이 생겨요.** 한쪽만 고치면 카피가 갈라지는데, 위로가 목적인 서비스에서 이건 기능 버그만큼 나빠요.
+
+그래서 3D 티켓의 첫 작업은 R3F 설치가 아니라 **카피를 `src/copy.js` 한 곳으로 뽑는 것**이에요. 그 다음에 2D·3D 장면이 같은 문장을 가져다 써요.
 
 ### 전환 전에 확인할 것
 
