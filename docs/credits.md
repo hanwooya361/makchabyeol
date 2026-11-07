@@ -4,5 +4,7 @@
 
 | 종류 | 이름 | 출처 | 라이선스 | 쓰인 곳 |
 | --- | --- | --- | --- | --- |
-| 폰트 | Pretendard (예정) | | SIL OFL 1.1 | 본문 |
-| 폰트 | 고운바탕 Gowun Batang (예정) | | SIL OFL 1.1 | 전광판·카피 |
+| 폰트 | Pretendard Variable | [orioncactus/pretendard](https://github.com/orioncactus/pretendard) · jsDelivr CDN (dynamic subset) | SIL OFL 1.1 | 본문·버튼 |
+| 폰트 | 고운바탕 Gowun Batang | [Google Fonts](https://fonts.google.com/specimen/Gowun+Batang) | SIL OFL 1.1 | 전광판·카피 |
+
+CDN으로 불러오고 있어요. 자체 호스팅은 배포 티켓(T14)에서 다시 봐요.

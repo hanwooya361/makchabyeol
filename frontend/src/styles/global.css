@@ -11,6 +11,7 @@
   color: var(--star-light);
   background: var(--night-sky);
   font-family:
+    "Pretendard Variable",
     "Pretendard",
     system-ui,
     -apple-system,
@@ -40,13 +41,8 @@ body {
 
 .scene {
   flex: 1;
-  display: grid;
-  place-items: center;
-}
-
-.placeholder {
-  font-size: 1.25rem;
-  letter-spacing: 0.05em;
+  display: flex;
+  flex-direction: column;
 }
 
 .footer {

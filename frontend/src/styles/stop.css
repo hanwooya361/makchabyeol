@@ -1,0 +1,94 @@
+/* S1 정류장. 기준 화면 360×780, 색·치수 근거는 docs/screen-design.md 2·4·5장 */
+.scene--stop {
+  position: relative;
+  padding: 24px 16px 0;
+  background: radial-gradient(120% 70% at 50% 0%, #16203c 0%, var(--night-sky) 70%);
+}
+
+/* 전광판 */
+.stop__sign {
+  align-self: center;
+  margin: auto 0 0;
+  padding: 10px 20px;
+  border: 1px solid rgb(246 199 107 / 35%);
+  border-radius: 8px;
+  background: var(--stop-shadow);
+  color: var(--lamp-light);
+  font-family: "Gowun Batang", serif;
+  font-size: 1.125rem;
+  letter-spacing: 0.08em;
+}
+
+/* 2초마다 한 번 살짝 꺼지는 느낌. 모션 줄이기면 global.css가 멈춘다 */
+.stop__sign-infinity {
+  display: inline-block;
+  animation: sign-flicker 2s ease-in-out infinite;
+}
+
+@keyframes sign-flicker {
+  0%,
+  86%,
+  94%,
+  100% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 0.35;
+  }
+}
+
+/* 실루엣. 바닥선이 화면 끝까지 닿도록 패딩 밖으로 흘린다 */
+.stop__art {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: flex-end;
+  min-height: 0;
+  margin: 12px -16px 0;
+}
+
+.stop__svg {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
+/* 교통카드 단말기 */
+.stop__reader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: center;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: var(--stop-shadow);
+  font-size: 0.9375rem;
+}
+
+.stop__reader-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--reader-green);
+  opacity: 0.35;
+}
+
+/* 터치 영역 44×44px 이상 */
+.stop__sky-link {
+  align-self: flex-end;
+  min-height: 44px;
+  margin: 12px 0 4px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  color: var(--star-light);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.stop__sky-link:hover,
+.stop__sky-link:focus-visible {
+  background: var(--stop-shadow);
+}

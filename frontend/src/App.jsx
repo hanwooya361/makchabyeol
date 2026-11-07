@@ -1,10 +1,10 @@
-// T01 뼈대: 실행되는 빈 화면까지만. 장면 전환(scene 상태)은 T02~T04에서 만든다.
+import Stop from "./scenes/Stop.jsx";
+
+// scene 상태로 S1~S3을 전환하는 구조는 T04에서. 지금은 S1만 보여준다.
 export default function App() {
   return (
     <div className="stage">
-      <main className="scene">
-        <p className="placeholder">막차까지 ∞분</p>
-      </main>
+      <Stop />
       <footer className="footer">
         <a href="#help">도움받을 곳</a>
       </footer>
