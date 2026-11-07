@@ -2,6 +2,12 @@
 
 각 작업 끝에 무엇을 왜 했는지 3줄로 남겨요. 최신 항목이 위로 와요.
 
+## 2026-11-07 · git 초기화 + 백엔드 빌드 첫 확인
+
+- git 저장소를 만들고 지금까지의 뼈대(문서·프론트·백엔드)를 첫 커밋으로 남김. `.claude/settings.local.json`은 로컬 전용이라 .gitignore에 추가함
+- `gradlew.bat test`가 "Cannot find a Java installation ... languageVersion=21"로 실패함. 로컬에 JDK 17만 설치돼 있었음
+- JDK를 수동 설치하는 대신 settings.gradle에 foojay-resolver-convention(3줄)을 넣어 Gradle이 JDK 21을 자동으로 내려받게 함. Java 21 설계를 그대로 두고 테스트 통과 확인(BUILD SUCCESSFUL)
+
 ## 2026-11-07 · 기획·설계·T01 프로젝트 뼈대
 
 - 컨셉을 "막차 정류장 + 별에 걱정 맡기기 + 교통카드 도장"으로 확정하고 PRD·화면 설계·기술 설계를 docs/에 정리함. 리뷰로 Must를 4개로 줄이고 위기 안내 집계·마들랜 링크를 추가함
