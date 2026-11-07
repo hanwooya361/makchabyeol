@@ -1,8 +1,14 @@
 import "./Stop.css";
 
+const FEEDBACK = {
+  first: "삑. 오늘도 여기까지 왔네요.",
+  again: "오늘은 이미 찍었어요. 그래도 와 줘서 고마워요.",
+};
+
 // S1 정류장. 실루엣은 장식이라 SVG를 통째로 aria-hidden 하고,
 // 읽어야 하는 글자는 모두 HTML로 올린다(대비·글자 크기 조절·스크린리더).
-export default function Stop() {
+// 오늘 이미 찍었는지 판단하는 건 App.jsx와 lib/의 몫이고, 여기선 받아서 그리기만 한다.
+export default function Stop({ tapped, onCardTap }) {
   return (
     <main className="scene scene--stop">
       <p className="stop__sign">
@@ -56,10 +62,23 @@ export default function Stop() {
         </svg>
       </div>
 
-      <div className="stop__reader">
-        <span className="stop__reader-led" aria-hidden="true" />
+      <button type="button" className="stop__reader" onClick={onCardTap}>
+        <span
+          className={tapped ? "stop__reader-led is-on" : "stop__reader-led"}
+          aria-hidden="true"
+        />
         카드를 대 주세요
-      </div>
+      </button>
+
+      {/* 영역은 늘 자리를 잡아 두고(CSS min-height) 내용만 바뀐다. 문구가 떴다 사라져도
+          레이아웃이 튀지 않고, aria-live가 붙은 바깥 요소는 그대로 살아 있어야 읽어 준다 */}
+      <p className="stop__feedback" aria-live="polite">
+        {tapped && (
+          <span key={tapped} className="stop__feedback-text">
+            {FEEDBACK[tapped]}
+          </span>
+        )}
+      </p>
 
       {/* shortcut: 아직 아무 동작 없는 버튼, T04에서 하늘(S2) 전환을 연결한다 */}
       <button type="button" className="stop__sky-link">

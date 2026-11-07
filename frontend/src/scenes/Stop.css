@@ -53,16 +53,26 @@
   max-height: 100%;
 }
 
-/* 교통카드 단말기 */
+/* 교통카드 단말기. 버튼이라 탭·Enter·Space가 공짜로 따라온다 */
 .stop__reader {
   display: flex;
   align-items: center;
   gap: 10px;
   align-self: center;
+  min-height: 44px;
   padding: 12px 18px;
+  border: 0;
   border-radius: 10px;
   background: var(--stop-shadow);
+  color: inherit;
+  font: inherit;
   font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.stop__reader:focus-visible {
+  outline: 2px solid var(--lamp-light);
+  outline-offset: 3px;
 }
 
 .stop__reader-led {
@@ -71,6 +81,56 @@
   border-radius: 50%;
   background: var(--reader-green);
   opacity: 0.35;
+}
+
+/* 찍히면 켜진 채로 남는다. 켜지는 순간만 0.15초 반짝 */
+.stop__reader-led.is-on {
+  opacity: 1;
+  animation: led-blip 0.15s ease-out;
+}
+
+@keyframes led-blip {
+  0% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.6);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 문구가 떠도 아래 버튼이 밀리지 않도록 자리를 미리 잡아 둔다 */
+.stop__feedback {
+  align-self: center;
+  min-height: 1.6em;
+  margin: 10px 0 0;
+  font-family: "Gowun Batang", serif;
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.stop__feedback-text {
+  display: inline-block;
+  animation: feedback-in 0.6s ease-out;
+}
+
+@keyframes feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* 터치 영역 44×44px 이상 */

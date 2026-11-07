@@ -33,14 +33,18 @@ body {
 
 .stage {
   max-width: var(--stage-max-width);
-  min-height: 100dvh;
+  height: 100dvh;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
 }
 
+/* 무대 높이가 화면에 묶여 있으므로 장면은 줄어들 수 있어야 한다.
+   글이 긴 장면(S5·S6)은 넘치면 스스로 스크롤한다 */
 .scene {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
