@@ -16,6 +16,13 @@ function pickPlaceholder() {
   return PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
 }
 
+// 숫자가 아직 없을 때도 할 말이 있어야 한다. 기다리는 동안 화면이 비어 있으면 더 외롭다
+function countMessage(night, slow) {
+  if (!night) return slow ? "오늘 밤에도 별이 뜨고 있어요." : null;
+  if (night.starCount < 5) return "오늘 밤 첫 별들 중 하나예요.";
+  return `오늘 밤 별 ${night.starCount}개가 떴어요. 혼자 기다리는 거 아니에요.`;
+}
+
 /**
  * S2 하늘·입력과 S3 별이 뜬 하늘. 같은 하늘이라 한 장면으로 두고 phase로 바꾼다.
  * phase: "ask"(입력) → "releasing"(띄우는 중) → "done"(내 별 고정)
@@ -23,12 +30,22 @@ function pickPlaceholder() {
  * 걱정 원문은 이 컴포넌트의 state에만 있다가 onRelease로 한 번 올라가고 끝난다.
  * 서버로 보내는 건 App이 하고, 보내는 건 익명 ID뿐이다.
  */
-export default function Sky({ inert, phase, released, onRelease, onSkip, onBackToStop }) {
+export default function Sky({
+  inert,
+  phase,
+  released,
+  night,
+  slow,
+  onRelease,
+  onSkip,
+  onBackToStop,
+}) {
   const [text, setText] = useState("");
   const [placeholder] = useState(pickPlaceholder);
 
   const remaining = MAX_LENGTH - text.length;
   const asking = phase === "ask";
+  const counted = countMessage(night, slow);
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -38,6 +55,23 @@ export default function Sky({ inert, phase, released, onRelease, onSkip, onBackT
 
   return (
     <section className={`scene scene--sky is-${phase}`} inert={inert}>
+      {/* 다른 사람들의 별. 좌표는 서버가 준 천분율이라 화면 크기와 상관없이 같은 자리에 뜬다 */}
+      {phase === "done" && night && (
+        <div className="sky__others" aria-hidden="true">
+          {night.stars.map((star, index) => (
+            <span
+              key={index}
+              className="sky__other-star"
+              style={{
+                left: `${star.x / 10}%`,
+                top: `${star.y / 10}%`,
+                background: `hsl(${star.hue} 70% 88%)`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       {phase !== "done" && (
         <form className="sky__form" onSubmit={handleSubmit}>
           <p className="sky__prompt">버스 오기 전에, 걱정 하나 맡기고 갈래요?</p>
@@ -78,7 +112,14 @@ export default function Sky({ inert, phase, released, onRelease, onSkip, onBackT
 
       {phase === "done" && (
         <div className="sky__after">
-          {/* 오늘 밤 별 개수와 다른 사람들의 별은 T08 */}
+          {/* 숫자가 늦게 오거나 끝내 안 와도 자리만 지키고 있다가 조용히 채워진다 */}
+          <p className="sky__count-message" aria-live="polite">
+            {counted ?? (
+              <>
+                오늘 밤 별 <span className="sky__dots">···</span>개가 떴어요.
+              </>
+            )}
+          </p>
           <p className="sky__closing">
             {released ? "내일 또 와요." : "괜찮아요. 그냥 앉아 있다 가도 돼요."}
           </p>

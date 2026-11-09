@@ -6,9 +6,9 @@ const TIMEOUT_MS = 15000;
 async function request(path, body) {
   try {
     const response = await fetch(`${BASE_URL}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      method: body ? "POST" : "GET",
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     return response.ok ? await response.json() : null;
@@ -21,4 +21,9 @@ async function request(path, body) {
 
 export function postStar(visitorId) {
   return request("/api/v1/stars", { visitorId });
+}
+
+// 오늘 밤 하늘. 실패하면 null이고, 화면은 숫자 없는 문구로 버틴다
+export function getNight() {
+  return request("/api/v1/night");
 }

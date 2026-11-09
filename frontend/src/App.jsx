@@ -4,6 +4,7 @@ import Sky from "./scenes/Sky.jsx";
 import { nightDate } from "./lib/night.js";
 import { readTapNight, writeTapNight } from "./lib/stamp.js";
 import { visitorId } from "./lib/visitor.js";
+import { useNight } from "./lib/useNight.js";
 import { postStar } from "./api/client.js";
 
 // 의식 시간은 설계 3장(0.8 + 1.5 + 0.5초). 모션 줄이기에서는 애니메이션이 없으니 기다릴 이유도 없다
@@ -21,6 +22,9 @@ export default function App() {
   const [scene, setScene] = useState("stop");
   const [skyPhase, setSkyPhase] = useState("ask");
   const [released, setReleased] = useState(false);
+
+  // 하늘에 올라온 동안만 폴링한다. 정류장에서는 서버를 부를 이유가 없다
+  const { night, slow } = useNight(scene === "sky");
 
   // 서버 기록은 T10. 지금은 기기에만 남긴다.
   function handleCardTap() {
@@ -52,6 +56,8 @@ export default function App() {
           inert={scene !== "sky"}
           phase={skyPhase}
           released={released}
+          night={night}
+          slow={slow}
           onRelease={handleRelease}
           onSkip={() => setSkyPhase("done")}
           onBackToStop={() => setScene("stop")}

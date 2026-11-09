@@ -198,3 +198,41 @@
   font-family: "Gowun Batang", serif;
   font-size: 1.0625rem;
 }
+
+/* 다른 사람들의 별. 장식이라 aria-hidden, 클릭도 받지 않는다 */
+.sky__others {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sky__other-star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  opacity: 0.75;
+}
+
+.sky__count-message {
+  margin: 0 0 4px;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+
+/* 숫자를 기다리는 동안 천천히 깜빡인다 */
+.sky__dots {
+  animation: sky-dots 1.6s ease-in-out infinite;
+}
+
+@keyframes sky-dots {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
