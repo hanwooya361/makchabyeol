@@ -8,7 +8,13 @@ import { useNight } from "./lib/useNight.js";
 import { postCardTap, postCrisisEvent, postStar } from "./api/client.js";
 import { isCrisis } from "./safety/crisis.js";
 import HelpCard from "./components/HelpCard.jsx";
-import { detectRenderer, isDebug } from "./lib/renderer.js";
+import {
+  detectRenderer,
+  forcedRenderer,
+  isDebug,
+  rememberFallback,
+  tooSlow,
+} from "./lib/renderer.js";
 
 // 3D 코드는 따로 쪼개 3D로 가는 사람만 받는다. 받는 동안은 2D가 대체 화면으로 보인다(설계 8장)
 const Stage3D = lazy(() => import("./scenes/three/Stage3D.jsx"));
@@ -36,6 +42,16 @@ export default function App() {
   const [crisisSeen, setCrisisSeen] = useState(false);
   // 3D 캔버스가 만들어지면 2D 그림을 숨긴다. 그 전까지는 2D가 그대로 보인다
   const [threeReady, setThreeReady] = useState(false);
+  const [renderer, setRenderer] = useState(RENDERER);
+
+  // 3D가 이 기기에서 버벅이면 조용히 2D로 내리고, 다음 방문부터는 바로 2D로 연다.
+  // 주소로 강제한 경우(측정 중)는 내리지 않는다
+  function handlePerf(fps) {
+    if (!tooSlow(fps) || forcedRenderer(window.location.search)) return;
+    rememberFallback();
+    setThreeReady(false);
+    setRenderer("2d");
+  }
 
   // 하늘에 올라온 동안만 폴링한다. 정류장에서는 서버를 부를 이유가 없다
   const { night, slow } = useNight(scene === "sky");
@@ -74,7 +90,7 @@ export default function App() {
 
   return (
     <div className="stage" data-three={threeReady ? "ready" : undefined}>
-      {RENDERER === "3d" && (
+      {renderer === "3d" && (
         <Suspense fallback={null}>
           <Stage3D
             scene={scene}
@@ -83,6 +99,7 @@ export default function App() {
             phase={skyPhase}
             debug={DEBUG}
             onReady={() => setThreeReady(true)}
+            onPerf={handlePerf}
           />
         </Suspense>
       )}

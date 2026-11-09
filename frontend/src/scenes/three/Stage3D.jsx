@@ -60,6 +60,23 @@ function FpsProbe({ onSample }) {
   return null;
 }
 
+// 처음 1초(셰이더 준비 등)는 빼고 그다음 3초 평균 fps를 한 번만 알린다. 2D로 내릴지는 App이 정한다.
+// 탭이 숨겨졌다 돌아온 긴 공백(0.5초 넘는 프레임)은 느린 게 아니라 멈춘 것이라 세지 않는다
+function PerfCheck({ onPerf }) {
+  const acc = useRef({ time: 0, frames: 0, done: false });
+  useFrame((_, dt) => {
+    const a = acc.current;
+    if (a.done || dt > 0.5) return;
+    a.time += dt;
+    if (a.time < 1) return;
+    a.frames += 1;
+    if (a.time < 4) return;
+    a.done = true;
+    onPerf(Math.round(a.frames / (a.time - 1)));
+  });
+  return null;
+}
+
 // 측정용 가짜 별. 서버 별과 합쳐 300개를 채운다
 function fillTo300(stars) {
   let seed = 11;
@@ -73,7 +90,7 @@ function fillTo300(stars) {
 }
 
 // 캔버스 안쪽. 화면 크기(useThree)를 알아야 카메라 자리를 정할 수 있어서 따로 둔다
-function World({ up, stars, showMine, debug, onSample }) {
+function World({ up, stars, showMine, debug, onSample, onPerf }) {
   const eye = useEye();
   return (
     <>
@@ -83,12 +100,13 @@ function World({ up, stars, showMine, debug, onSample }) {
       <StopModel />
       <StarField stars={stars} showMine={showMine} origin={eye} pitch={SKY_PITCH} />
       <CameraRig up={up} eye={eye} />
+      <PerfCheck onPerf={onPerf} />
       {debug && <FpsProbe onSample={onSample} />}
     </>
   );
 }
 
-export default function Stage3D({ scene, night, released, phase, debug, onReady }) {
+export default function Stage3D({ scene, night, released, phase, debug, onReady, onPerf }) {
   const fpsText = useRef(null);
   function showFps(fps, worst) {
     fpsText.current.textContent = `${fps} fps · 가장 긴 프레임 ${worst}ms`;
@@ -104,7 +122,11 @@ export default function Stage3D({ scene, night, released, phase, debug, onReady 
         dpr={[1, 1.5]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
         camera={{ fov: 55, near: 0.1, far: 90 }}
-        onCreated={onReady}
+        onCreated={({ gl }) => {
+          // GPU가 캔버스를 빼앗기면(메모리 부족 등) 아주 느린 것과 같게 본다
+          gl.domElement.addEventListener("webglcontextlost", () => onPerf(0));
+          onReady();
+        }}
       >
         <World
           up={scene === "sky"}
@@ -113,6 +135,7 @@ export default function Stage3D({ scene, night, released, phase, debug, onReady 
           showMine={released && phase === "done"}
           debug={debug}
           onSample={showFps}
+          onPerf={onPerf}
         />
       </Canvas>
       {debug && <p className="three__fps" ref={fpsText} />}
