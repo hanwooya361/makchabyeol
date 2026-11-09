@@ -31,7 +31,7 @@
 
 ```mermaid
 flowchart LR
-    U[사용자 브라우저] -->|HTML·JS·CSS| FE[정적 호스팅<br/>React + Vite 빌드]
+    U[사용자 브라우저] -->|HTML·JS·CSS| FE[Cloudflare Workers 정적 자산<br/>React + Vite 빌드]
     U -->|fetch /api/v1| BE[Render<br/>Spring Boot API]
     BE -->|JPA / JDBC| DB[(Neon<br/>PostgreSQL)]
     U -.->|키워드 감지는 브라우저 안에서만| SF[safety/crisis.js]
@@ -244,6 +244,11 @@ makchabyeol/
 | DATABASE_USERNAME | 백엔드 | | prod 전용 |
 | DATABASE_PASSWORD | 백엔드 | | prod 전용 |
 | ALLOWED_ORIGINS | 백엔드 | `http://localhost:5173` | 쉼표로 여러 개 |
+| PORT | 백엔드 | (Render가 자동으로 줌) | 없으면 8080 |
+| CLOUDFLARE_API_TOKEN | GitHub Secrets | | CI가 프론트를 올릴 때 |
+| CLOUDFLARE_ACCOUNT_ID | GitHub Secrets | | CI가 프론트를 올릴 때 |
+
+배포(T14): main 푸시 → GitHub Actions가 프론트(린트·포맷·테스트·빌드)와 백엔드(테스트)를 검사 → 모두 통과하면 Actions가 프론트를 Cloudflare Workers 정적 자산으로 올리고, Render는 "After CI Checks Pass" 설정으로 `backend/Dockerfile`을 스스로 배포한다. 프론트 `VITE_API_BASE_URL`은 빌드 때 박히므로 GitHub 저장소 Variables에 둔다. 절차는 README.md "배포".
 
 ## 7. 4주 일정
 

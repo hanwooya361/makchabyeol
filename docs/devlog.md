@@ -1,6 +1,11 @@
 # 개발 일지
 
 각 작업 끝에 무엇을 왜 했는지 3줄로 남겨요. 최신 항목이 위로 와요.
+## 2026-11-09 · T14 배포 + CI (설정 파일까지)
+
+- 프론트 호스팅은 Cloudflare Workers 정적 자산으로 확정(Vercel Hobby는 비상업 제한이라 나중 후원 링크와 부딪힘, Cloudflare는 새 프로젝트에 Pages 대신 Workers를 권함). main 푸시 → Actions가 프론트·백엔드를 검사하고, 통과한 바로 그 빌드를 `wrangler deploy`로 올림. 백엔드는 Render "After CI Checks Pass"라 배포 훅·비밀값이 필요 없음
+- Render는 Java를 직접 안 돌려서 `backend/Dockerfile`(JDK로 빌드, JRE로 실행, 512MB에 맞춰 힙 75%·SerialGC). Postgres 17 컨테이너 + `--memory=512m`로 띄워 기동 5.6초·메모리 253MB, 마이그레이션·별·카드·위기 API·CORS 확인. `gradlew` 실행 권한(100644→755)과 LF 고정(.gitattributes)도 같이 — 안 하면 리눅스에서 실행이 안 됨
+- 그러다 T11에서 넣은 `server:` 블록이 `spring:` 한가운데 들어가 `jpa` 설정(open-in-view·ddl-auto validate)이 `server:` 밑으로 빠져 무시되고 있던 걸 로그 경고로 발견해 고침. 그동안 테스트는 H2 기본값(create-drop)으로 돌았던 셈 — validate로 다시 24개 통과. 계정이 필요한 실제 배포(Neon·Render·Cloudflare·GitHub)는 README "배포" 절차대로 진행
 ## 2026-11-09 · T13 접근성 점검
 
 - 가장 큰 구멍은 장면 전환 때 포커스가 사라지는 것이었다(보이던 장면이 inert가 되면 포커스가 맨 앞으로 튐). 장면이 보이게 되면 그 단계의 첫 동작(단말기·입력칸·"다시 정류장으로")으로 포커스를 옮긴다. 화면 표현이라 `Stop`·`Sky` 안에서 처리하고, 첫 화면에서는 옮기지 않는다(이전 inert 값과 비교 — StrictMode 두 번 실행에도 안전)

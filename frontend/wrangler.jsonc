@@ -1,0 +1,6 @@
+// Cloudflare Workers 정적 자산. Worker 코드 없이 빌드된 dist/만 올린다
+{
+  "name": "makchabyeol",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./dist" },
+}

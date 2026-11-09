@@ -31,7 +31,7 @@
 - 프론트: React 19 + Vite (JavaScript), 정적 호스팅. 린트 oxlint, 포맷 Prettier
 - 백엔드: Spring Boot 3.5 + Java 21 + Gradle. 기능별 패키지(star, cardtap, crisis, common, config)
 - DB: PostgreSQL (배포: Neon 무료), 로컬은 H2 메모리 DB(PostgreSQL 모드)
-- 배포: 프론트 정적 호스팅(Vercel 또는 Cloudflare Pages), 백엔드 Render 무료 → 후원이 모이면 상시 가동 인스턴스로
+- 배포: 프론트 Cloudflare Workers 정적 자산(T14에서 확정. Vercel Hobby는 비상업 제한), 백엔드 Render 무료(Docker) → 후원이 모이면 상시 가동 인스턴스로. main 푸시 → GitHub Actions 검사 통과 시에만 배포
 - 서버가 잠들어 있어도(Render 무료) 장면과 의식은 서버 응답을 기다리지 않게 만든다
 
 ## 참고 문서

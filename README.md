@@ -41,6 +41,24 @@ http://localhost:8080/api/health 에서 `{"status":"UP"}`가 보이면 성공이
 
 `.env.example`을 참고하세요. 프론트 변수는 `frontend/.env.local`에, 백엔드 변수는 실행 환경(IDE 실행 설정 또는 배포 플랫폼)에 넣어요. 실제 값이 든 파일은 커밋하지 않아요.
 
+## 배포
+
+main에 푸시하면 GitHub Actions(`.github/workflows/ci.yml`)가 검사하고, 모두 통과해야만 배포돼요. 처음 한 번만 아래를 설정해요. 지역은 한국에서 가까운 Singapore로 맞춰요.
+
+1. **Neon**: 프로젝트 생성(Singapore) → Connection string에서 **Pooled connection을 끈** 주소를 받아요(Flyway 마이그레이션이 풀러와 잘 안 맞음). `postgresql://사용자:비밀번호@호스트/DB?sslmode=require`를 세 값으로 나눠요
+   - `DATABASE_URL` = `jdbc:postgresql://호스트/DB?sslmode=require`
+   - `DATABASE_USERNAME`, `DATABASE_PASSWORD`
+2. **Cloudflare**: My Profile > API Tokens > "Edit Cloudflare Workers" 템플릿으로 토큰 발급. 계정 ID는 대시보드 오른쪽 사이드바에 있어요
+3. **GitHub 저장소** Settings > Secrets and variables > Actions
+   - Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+   - Variables: `VITE_API_BASE_URL` = Render 주소(4번에서 생김, 예: `https://makchabyeol-api.onrender.com`)
+4. **Render**: New > Web Service > 이 저장소 → Root Directory `backend`, Language **Docker**, Region Singapore, Instance **Free**
+   - Environment: `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `ALLOWED_ORIGINS` = 프론트 주소(첫 배포 뒤 생기는 `https://makchabyeol.<계정>.workers.dev`)
+   - Settings: Health Check Path `/api/health`, Auto-Deploy **After CI Checks Pass**
+5. 프론트 주소와 백엔드 주소가 생긴 뒤 3번 Variables와 4번 `ALLOWED_ORIGINS`를 채우고, main에 한 번 더 푸시해요
+
+확인: 프론트 주소에서 별을 띄운 뒤 개발자 도구 Network 탭에 `stars`가 201로 찍히면 끝이에요. Render 무료 서버는 15분 동안 아무도 안 오면 잠들어서, 첫 요청이 1분 가까이 걸릴 수 있어요(화면은 기다리지 않아요).
+
 ## 도움이 필요하다면
 
 자살예방상담전화 109 (24시간, 무료)
