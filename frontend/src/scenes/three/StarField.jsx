@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useThree } from "@react-three/fiber";
 import { AdditiveBlending, Color, Euler, Object3D, SRGBColorSpace, Vector3 } from "three";
 import { makeGlowTexture } from "./glow.js";
@@ -126,6 +126,10 @@ function MyStar({ origin, pitch }) {
 }
 
 export default function StarField({ stars, showMine, origin, pitch }) {
+  // 별 자리는 InstancedMesh를 직접 고쳐서 바꾸므로 R3F가 모른다. 바뀌면 한 번 다시 그리게 알린다
+  const invalidate = useThree((state) => state.invalidate);
+  useEffect(() => invalidate(), [stars, showMine, invalidate]);
+
   return (
     <group>
       <BackgroundStars origin={origin} />

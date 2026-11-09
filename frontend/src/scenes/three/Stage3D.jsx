@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
 import StopModel from "./StopModel.jsx";
@@ -29,16 +29,22 @@ function useEye() {
   }, [camera, size.width, size.height]);
 }
 
-// 카메라는 한자리에서 고개만 든다
+// 카메라는 한자리에서 고개만 든다. 움직일 때만 다음 프레임을 부른다(가만히 있을 땐 다시 그리지 않음)
 function CameraRig({ up, eye }) {
   const progress = useRef(up ? 1 : 0);
+  const invalidate = useThree((state) => state.invalidate);
+
+  // 장면이 바뀌면 멈춰 있던 그리기를 깨운다
+  useEffect(() => invalidate(), [up, invalidate]);
 
   useFrame(({ camera }, dt) => {
     const target = up ? 1 : 0;
-    const step = Math.min(Math.abs(target - progress.current), dt / TILT_SECONDS);
+    // 한참 쉬다 깬 첫 프레임은 dt가 커서 한 번에 끝까지 가 버린다. 한 프레임 몫으로 자른다
+    const step = Math.min(Math.abs(target - progress.current), Math.min(dt, 1 / 30) / TILT_SECONDS);
     progress.current += Math.sign(target - progress.current) * step;
     camera.position.copy(eye);
     camera.rotation.set(STOP_PITCH + (SKY_PITCH - STOP_PITCH) * easeInOut(progress.current), 0, 0);
+    if (progress.current !== target) invalidate();
   });
   return null;
 }
@@ -62,7 +68,10 @@ function FpsProbe({ onSample }) {
 
 // 처음 1초(셰이더 준비 등)는 빼고 그다음 3초 평균 fps를 한 번만 알린다. 2D로 내릴지는 App이 정한다.
 // 탭이 숨겨졌다 돌아온 긴 공백(0.5초 넘는 프레임)은 느린 게 아니라 멈춘 것이라 세지 않는다
-function PerfCheck({ onPerf }) {
+// 측정이 끝나면 "움직일 때만 그리기"로 바꾼다. 밤에 오래 켜 두는 화면이라 폰 배터리·발열을 아낀다.
+// ?debug일 때는 fps를 계속 봐야 해서 계속 그린다
+function PerfCheck({ onPerf, debug }) {
+  const setFrameloop = useThree((state) => state.setFrameloop);
   const acc = useRef({ time: 0, frames: 0, done: false });
   useFrame((_, dt) => {
     const a = acc.current;
@@ -73,6 +82,7 @@ function PerfCheck({ onPerf }) {
     if (a.time < 4) return;
     a.done = true;
     onPerf(Math.round(a.frames / (a.time - 1)));
+    if (!debug) setFrameloop("demand");
   });
   return null;
 }
@@ -100,7 +110,7 @@ function World({ up, stars, showMine, debug, onSample, onPerf }) {
       <StopModel />
       <StarField stars={stars} showMine={showMine} origin={eye} pitch={SKY_PITCH} />
       <CameraRig up={up} eye={eye} />
-      <PerfCheck onPerf={onPerf} />
+      <PerfCheck onPerf={onPerf} debug={debug} />
       {debug && <FpsProbe onSample={onSample} />}
     </>
   );
