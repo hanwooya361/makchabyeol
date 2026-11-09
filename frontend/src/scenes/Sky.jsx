@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Sky.css";
 
 // 예시는 돌려 가며 하나만 보여 준다. 매번 같은 문장이면 "이런 걸 쓰라는 건가" 싶어진다
@@ -42,6 +42,16 @@ export default function Sky({
 }) {
   const [text, setText] = useState("");
   const [placeholder] = useState(pickPlaceholder);
+  const input = useRef(null);
+  const back = useRef(null);
+
+  // 하늘이 보이게 되거나 별이 다 뜨면 그 단계의 첫 동작으로 포커스를 옮긴다. 장면이 바뀌어도
+  // 키보드·스크린리더 사용자가 길을 잃지 않게. 띄우는 중에는 누를 게 없으니 두고,
+  // 위기 카드가 같이 뜨면 카드가 포커스를 가져갔다가 닫힐 때 "다시 정류장으로"로 돌려준다
+  useEffect(() => {
+    if (inert || phase === "releasing") return;
+    (phase === "done" ? back : input).current.focus({ preventScroll: true });
+  }, [inert, phase]);
 
   const remaining = MAX_LENGTH - text.length;
   const asking = phase === "ask";
@@ -80,6 +90,7 @@ export default function Sky({
             <span className="sky__label">걱정 한 줄</span>
             <input
               className="sky__input"
+              ref={input}
               type="text"
               value={text}
               onChange={(event) => setText(event.target.value)}
@@ -123,7 +134,7 @@ export default function Sky({
           <p className="sky__closing">
             {released ? "내일 또 와요." : "괜찮아요. 그냥 앉아 있다 가도 돼요."}
           </p>
-          <button className="sky__back" type="button" onClick={onBackToStop}>
+          <button className="sky__back" type="button" ref={back} onClick={onBackToStop}>
             다시 정류장으로
           </button>
         </div>

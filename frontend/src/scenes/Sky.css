@@ -59,11 +59,11 @@
 }
 
 .sky__input::placeholder {
-  color: rgb(255 244 214 / 40%);
+  /* 55%에서 배경 대비 5.5:1. 40%는 3.5:1로 기준(4.5:1) 미달이었다 */
+  color: rgb(255 244 214 / 55%);
 }
 
 .sky__input:focus-visible {
-  outline: 0;
   border-bottom-color: var(--lamp-light);
 }
 

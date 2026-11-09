@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import "./Stop.css";
 
 const FEEDBACK = {
@@ -9,6 +10,16 @@ const FEEDBACK = {
 // 읽어야 하는 글자는 모두 HTML로 올린다(대비·글자 크기 조절·스크린리더).
 // 오늘 이미 찍었는지 판단하는 건 App.jsx와 lib/의 몫이고, 여기선 받아서 그리기만 한다.
 export default function Stop({ inert, tapped, onCardTap, onSkyLink }) {
+  const reader = useRef(null);
+  const wasInert = useRef(inert);
+
+  // 하늘에서 돌아오면 포커스를 단말기로. 안 그러면 inert가 된 하늘에서 포커스가 사라져 맨 앞으로 튄다.
+  // 첫 화면에서는 옮기지 않는다(이전 값과 비교하니 StrictMode의 두 번 실행에도 안전)
+  useEffect(() => {
+    if (wasInert.current && !inert) reader.current.focus({ preventScroll: true });
+    wasInert.current = inert;
+  }, [inert]);
+
   return (
     <section className="scene scene--stop" inert={inert}>
       <p className="stop__sign">
@@ -62,7 +73,7 @@ export default function Stop({ inert, tapped, onCardTap, onSkyLink }) {
         </svg>
       </div>
 
-      <button type="button" className="stop__reader" onClick={onCardTap}>
+      <button type="button" className="stop__reader" ref={reader} onClick={onCardTap}>
         <span
           className={tapped ? "stop__reader-led is-on" : "stop__reader-led"}
           aria-hidden="true"
