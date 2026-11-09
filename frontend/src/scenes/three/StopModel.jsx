@@ -32,7 +32,11 @@ export default function StopModel() {
 
       {/* 정류장: 지붕, 뒤판, 기둥 둘 */}
       <Block position={[0.6, 2.6, 0]} size={[3.6, 0.14, 1.5]} />
-      <Block position={[0.6, 1.5, -0.65]} size={[3.4, 2.1, 0.06]} color="#18213c" />
+      {/* 뒤판은 유리. 캐릭터가 정류장 뒤로 돌아가도 카메라에서 보이게(T22.2) */}
+      <mesh position={[0.6, 1.5, -0.65]}>
+        <boxGeometry args={[3.4, 2.1, 0.06]} />
+        <meshLambertMaterial color="#3a4f86" transparent opacity={0.28} depthWrite={false} />
+      </mesh>
       <Block position={[-1.1, 1.3, 0.6]} size={[0.1, 2.6, 0.1]} />
       <Block position={[2.3, 1.3, 0.6]} size={[0.1, 2.6, 0.1]} />
 

@@ -2,31 +2,56 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
 
-// 내 실루엣과 "누른 곳으로 걷기"(T22). 걷기는 장식이라 의식 로직과 상관없다:
-// 걷지 않아도 카드 찍기·별 띄우기는 그대로다. 그래서 장면 안에서만 다룬다.
+// 내 캐릭터와 걷기(T22, T22.2). 걷기는 장식이라 의식 로직과 상관없다:
+// 걷지 않아도 별 띄우기·카드 찍기는 그대로다. 그래서 장면 안에서만 다룬다.
 // 2단계(같이 있기)에서는 이 위치를 콜백으로 올려 서버에 보낸다
 
-// 정류장 앞 보도 안에서만. 벤치 앞(z 0.15)부터 연석 전(z 1.6)까지
-const AREA = { minX: -2.8, maxX: 3.0, minZ: 0.15, maxZ: 1.6 };
-// 지나가면 안 되는 기둥들(가로등, 정류장 기둥 둘): [x, z]
+// 정류장 주변 인도 16m × 4.6m. 뒤판 양 끝으로 돌아 정류장 뒤까지 갈 수 있다. 연석(z 1.6) 너머는 차도
+const AREA = { minX: -8, maxX: 8, minZ: -3, maxZ: 1.6 };
+const BODY = 0.25; // 몸 반지름. 벽에 몸이 묻히지 않게 장애물을 이만큼 부풀린다
+// 상자 장애물 [x1, x2, z1, z2]: 정류장 뒤판, 벤치(StopModel과 같은 자리)
+const BOXES = [
+  [-1.1, 2.3, -0.68, -0.62],
+  [-0.4, 1.6, -0.5, -0.02],
+];
+// 원 장애물 [x, z]: 가로등, 정류장 기둥 둘
 const POSTS = [
   [-2.1, 0.4],
   [-1.1, 0.6],
   [2.3, 0.6],
 ];
-const POST_RADIUS = 0.3;
-const SPEED = 1.3; // m/s, 천천히 걷는 걸음
-const KEY_STEP = 0.8;
+const POST_RADIUS = 0.08 + BODY;
+const SPEED = 1.6; // m/s, 천천히 걷는 걸음
 export const START = new Vector3(0.6, 0, 1.0);
 
-function clampToArea(p) {
+// 누르고 있는 동안 걷는 키: [오른쪽, 앞]
+const KEYS = {
+  KeyW: [0, 1],
+  ArrowUp: [0, 1],
+  KeyS: [0, -1],
+  ArrowDown: [0, -1],
+  KeyA: [-1, 0],
+  ArrowLeft: [-1, 0],
+  KeyD: [1, 0],
+  ArrowRight: [1, 0],
+};
+
+// 구역 안으로, 장애물 밖으로. 벽에 부딪히면 덜 파고든 쪽으로 밀어내서 벽을 따라 미끄러진다
+function resolve(p) {
   p.x = Math.min(AREA.maxX, Math.max(AREA.minX, p.x));
   p.z = Math.min(AREA.maxZ, Math.max(AREA.minZ, p.z));
-  return p;
-}
-
-// 기둥 안으로 들어갔으면 기둥 둘레로 밀어낸다
-function pushOutOfPosts(p) {
+  for (const [x1, x2, z1, z2] of BOXES) {
+    const left = p.x - (x1 - BODY);
+    const right = x2 + BODY - p.x;
+    const back = p.z - (z1 - BODY);
+    const front = z2 + BODY - p.z;
+    if (left <= 0 || right <= 0 || back <= 0 || front <= 0) continue;
+    const least = Math.min(left, right, back, front);
+    if (least === left) p.x -= left;
+    else if (least === right) p.x += right;
+    else if (least === back) p.z -= back;
+    else p.z += front;
+  }
   for (const [x, z] of POSTS) {
     const dx = p.x - x;
     const dz = p.z - z;
@@ -46,44 +71,84 @@ export default function Walker({ active, me }) {
   const body = useRef(null);
   const ring = useRef(null);
   const target = useMemo(() => START.clone(), []);
+  const held = useRef(new Set());
   const invalidate = useThree((state) => state.invalidate);
 
   function walkTo(point) {
-    target.copy(pushOutOfPosts(clampToArea(new Vector3(point.x, 0, point.z))));
+    target.copy(resolve(new Vector3(point.x, 0, point.z)));
     ring.current.position.set(target.x, 0.08, target.z);
     ring.current.visible = true;
     invalidate();
   }
 
-  // 키보드로도 걸을 수 있게. 입력칸에 쓰는 중이거나 정류장이 아닐 때는 듣지 않는다
+  // 키는 누르고 있는 동안만 걷는다. 입력칸에 쓰는 중이거나 정류장이 아닐 때는 듣지 않는다
   useEffect(() => {
-    if (!active) return undefined;
-    const dirs = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
-    function onKey(event) {
-      const dir = dirs[event.key];
-      if (!dir || event.target.closest?.("input, textarea")) return;
-      event.preventDefault();
-      walkTo({ x: me.current.x + dir[0] * KEY_STEP, z: me.current.z + dir[1] * KEY_STEP });
+    const keys = held.current;
+    if (!active) {
+      keys.clear();
+      return undefined;
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
+    function down(event) {
+      if (!KEYS[event.code] || event.target.closest?.("input, textarea")) return;
+      event.preventDefault(); // 방향키로 페이지가 스크롤되지 않게
+      keys.add(event.code);
+      invalidate();
+    }
+    function up(event) {
+      keys.delete(event.code);
+    }
+    const clear = () => keys.clear(); // 다른 창으로 가면 손을 뗀 걸로
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", clear);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", clear);
+    };
+  }, [active, invalidate]);
 
-  useFrame((_, dt) => {
+  useFrame(({ camera }, dt) => {
     const p = me.current;
-    const to = target.clone().sub(p);
-    const dist = to.length();
-    if (dist < 0.01) {
-      ring.current.visible = false;
-      return;
+    const step = SPEED * Math.min(dt, 1 / 30);
+    const from = p.clone();
+
+    // 키: 카메라가 보는 쪽이 앞(W). 카메라 회전은 YXZ 순서라 rotation.y가 좌우로 본 각도다
+    let right = 0;
+    let forward = 0;
+    for (const code of held.current) {
+      right += KEYS[code][0];
+      forward += KEYS[code][1];
     }
-    const step = Math.min(dist, SPEED * Math.min(dt, 1 / 30));
-    p.add(to.multiplyScalar(step / dist));
-    pushOutOfPosts(p);
+    if (right || forward) {
+      const yaw = camera.rotation.y;
+      const move = new Vector3(
+        Math.cos(yaw) * right - Math.sin(yaw) * forward,
+        0,
+        -Math.sin(yaw) * right - Math.cos(yaw) * forward,
+      );
+      p.addScaledVector(move.normalize(), step);
+      resolve(p);
+      target.copy(p); // 키로 걷기 시작하면 누른 곳 걷기는 그만
+      ring.current.visible = false;
+    } else {
+      const to = target.clone().sub(p);
+      const dist = to.length();
+      if (dist < 0.01) {
+        ring.current.visible = false;
+        return;
+      }
+      p.addScaledVector(to, Math.min(dist, step) / dist);
+      resolve(p);
+      // 벽에 막혀 더 못 가면 거기서 멈춘다(제자리걸음으로 계속 그리지 않게)
+      if (p.distanceToSquared(from) < 1e-8) target.copy(p);
+    }
+
     // 가는 쪽을 본다(가만히 있을 때 앞은 -z, 정류장 쪽). 걸음마다 아주 살짝 들썩인다
+    const moved = p.clone().sub(from);
+    if (moved.lengthSq() > 1e-8) body.current.rotation.y = Math.atan2(-moved.x, -moved.z);
     const bob = Math.abs(Math.sin(performance.now() / 160)) * 0.03;
     body.current.position.set(p.x, bob, p.z);
-    body.current.rotation.y = Math.atan2(-(target.x - p.x), -(target.z - p.z));
     invalidate();
   });
 
@@ -100,7 +165,7 @@ export default function Walker({ active, me }) {
           walkTo(event.point);
         }}
       >
-        <planeGeometry args={[30, 30]} />
+        <planeGeometry args={[40, 40]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
