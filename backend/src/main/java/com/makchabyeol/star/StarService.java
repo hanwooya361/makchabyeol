@@ -1,6 +1,7 @@
 package com.makchabyeol.star;
 
 import com.makchabyeol.common.NightDate;
+import com.makchabyeol.common.RateLimitedException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +17,8 @@ public class StarService {
 
     private static final int MAX_STARS = 300;
     private static final int CACHE_SECONDS = 10;
+    private static final int PER_MINUTE = 3;
+    private static final int PER_NIGHT = 20;
 
     private final StarRepository stars;
 
@@ -45,6 +48,13 @@ public class StarService {
     @Transactional
     public StarResponse create(UUID visitorId) {
         LocalDate tonight = NightDate.of(Instant.now());
+
+        // 방문자당 1분 3개·밤 하루 20개. DB로 세니 서버가 재시작해도 풀리지 않는다.
+        // 동시에 몰린 요청 몇 개가 한도를 살짝 넘을 수 있지만 도배 방지에는 충분하다
+        if (stars.countByVisitorIdAndCreatedAtAfter(visitorId, Instant.now().minusSeconds(60)) >= PER_MINUTE
+                || stars.countByVisitorIdAndNightDate(visitorId, tonight) >= PER_NIGHT) {
+            throw RateLimitedException.stars();
+        }
 
         // 위치와 색은 서버가 정한다. 클라이언트가 좌표를 보내면 누군가 하늘에 글자를 그릴 수 있다
         ThreadLocalRandom random = ThreadLocalRandom.current();

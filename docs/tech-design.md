@@ -186,7 +186,7 @@ erDiagram
 
 | 항목 | 방식 | 위치 |
 | --- | --- | --- |
-| 도배 방지 | 메모리 기반 rate limit. 별: 방문자당 1분 3개·하루 20개, IP당 1분 10개. 카드·위기: IP당 1분 10회 | 백엔드 `RateLimitFilter` (Bucket4j) |
+| 도배 방지 | 별: 방문자당 1분 3개·밤 하루 20개(DB 카운트, 재시작해도 유지), IP당 1분 10개. 카드·위기: IP당 1분 10회. IP 한도는 메모리 1분 고정 창(의존성 없음, 서버 1대 기준 — 여러 대가 되면 Redis). 초과 시 429 `TOO_MANY_STARS`/`TOO_MANY_REQUESTS` | 방문자: `StarService`, IP: `config/RateLimitInterceptor` |
 | 캡차 | MVP에서는 안 씀. 남에게 보이는 글이 없어 악용 동기가 낮음. 별 개수 부풀리기가 관측되면 도입 | - |
 | 입력 검증 | visitorId UUID 형식, 요청 본문 크기 1KB 제한 | DTO + `@Valid` |
 | CORS | 프론트 도메인만 허용 (`ALLOWED_ORIGINS`) | `WebConfig` |

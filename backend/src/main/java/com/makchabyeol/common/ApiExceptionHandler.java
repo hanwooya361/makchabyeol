@@ -21,4 +21,10 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> invalidRequest() {
         return ResponseEntity.badRequest().body(INVALID_VISITOR_ID);
     }
+
+    @ExceptionHandler(RateLimitedException.class)
+    public ResponseEntity<ErrorResponse> rateLimited(RateLimitedException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(new ErrorResponse(e.getCode(), e.getMessage()));
+    }
 }
