@@ -30,6 +30,20 @@
   visibility: hidden;
 }
 
+/* 정류장에서는 빈 곳을 누르면 아래 3D 바닥까지 닿게(걷기). 버튼·링크는 그대로 눌린다 */
+.stage[data-three="ready"] .scenes,
+.stage[data-three="ready"] .scene--stop {
+  pointer-events: none;
+}
+
+.stage[data-three="ready"] .scene--sky {
+  pointer-events: auto;
+}
+
+.stage[data-three="ready"] .scene--stop :is(button, a) {
+  pointer-events: auto;
+}
+
 .three__fps {
   position: absolute;
   top: 8px;

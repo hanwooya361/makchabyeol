@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
 import StopModel from "./StopModel.jsx";
 import StarField from "./StarField.jsx";
+import Walker, { START } from "./Walker.jsx";
 import "./Stage3D.css";
 
 // 3D 정류장·밤하늘(T17 시험 제작). 2D 장면과 같은 값을 받아 그리기만 한다.
@@ -29,9 +30,13 @@ function useEye() {
   }, [camera, size.width, size.height]);
 }
 
-// 카메라는 한자리에서 고개만 든다. 움직일 때만 다음 프레임을 부른다(가만히 있을 땐 다시 그리지 않음)
-function CameraRig({ up, eye }) {
+// 카메라는 고개를 들고(하늘), 내 실루엣을 따라 옆으로 반쯤만 미끄러진다(3인칭).
+// 움직일 때만 다음 프레임을 부른다(가만히 있을 땐 다시 그리지 않음)
+const FOLLOW = 0.5;
+
+function CameraRig({ up, eye, me }) {
   const progress = useRef(up ? 1 : 0);
+  const offsetX = useRef((me.current.x - START.x) * FOLLOW);
   const invalidate = useThree((state) => state.invalidate);
 
   // 장면이 바뀌면 멈춰 있던 그리기를 깨운다
@@ -42,9 +47,12 @@ function CameraRig({ up, eye }) {
     // 한참 쉬다 깬 첫 프레임은 dt가 커서 한 번에 끝까지 가 버린다. 한 프레임 몫으로 자른다
     const step = Math.min(Math.abs(target - progress.current), Math.min(dt, 1 / 30) / TILT_SECONDS);
     progress.current += Math.sign(target - progress.current) * step;
-    camera.position.copy(eye);
+    // 따라가기는 부드럽게 늦게(1초에 남은 거리의 약 95%)
+    const wantX = (me.current.x - START.x) * FOLLOW;
+    offsetX.current += (wantX - offsetX.current) * (1 - Math.exp(-3 * Math.min(dt, 1 / 30)));
+    camera.position.set(eye.x + offsetX.current, eye.y, eye.z);
     camera.rotation.set(STOP_PITCH + (SKY_PITCH - STOP_PITCH) * easeInOut(progress.current), 0, 0);
-    if (progress.current !== target) invalidate();
+    if (progress.current !== target || Math.abs(wantX - offsetX.current) > 0.002) invalidate();
   });
   return null;
 }
@@ -102,6 +110,8 @@ function fillTo300(stars) {
 // 캔버스 안쪽. 화면 크기(useThree)를 알아야 카메라 자리를 정할 수 있어서 따로 둔다
 function World({ up, stars, debug, onSample, onPerf }) {
   const eye = useEye();
+  // 내 실루엣 위치. 걷기(Walker)가 바꾸고 카메라(CameraRig)가 읽는다
+  const me = useRef(START.clone());
   return (
     <>
       <color attach="background" args={["#0e1530"]} />
@@ -109,7 +119,8 @@ function World({ up, stars, debug, onSample, onPerf }) {
       <ambientLight color="#3a4a7a" intensity={0.6} />
       <StopModel />
       <StarField stars={stars} origin={eye} pitch={SKY_PITCH} />
-      <CameraRig up={up} eye={eye} />
+      <Walker active={!up} me={me} />
+      <CameraRig up={up} eye={eye} me={me} />
       <PerfCheck onPerf={onPerf} debug={debug} />
       {debug && <FpsProbe onSample={onSample} />}
     </>
