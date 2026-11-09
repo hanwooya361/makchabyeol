@@ -94,7 +94,8 @@ export default function Walker({ active, me }) {
         rotation-x={-Math.PI / 2}
         position={[0, 0.08, 0]}
         onClick={(event) => {
-          if (!active) return;
+          // 끌어서 카메라를 돌린 뒤 손을 뗀 건 탭이 아니다(8px, CameraRig와 같은 기준)
+          if (!active || event.delta > 8) return;
           event.stopPropagation();
           walkTo(event.point);
         }}

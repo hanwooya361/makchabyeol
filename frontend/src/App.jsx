@@ -43,6 +43,8 @@ export default function App() {
   // 3D 캔버스가 만들어지면 2D 그림을 숨긴다. 그 전까지는 2D가 그대로 보인다
   const [threeReady, setThreeReady] = useState(false);
   const [renderer, setRenderer] = useState(RENDERER);
+  // 3D에서 카메라로 위를 많이 올려다보는 중. 하늘로 넘기지 않고 "하늘 보기"만 살짝 강조한다
+  const [lookingUp, setLookingUp] = useState(false);
 
   // 3D가 이 기기에서 버벅이면 조용히 2D로 내리고, 다음 방문부터는 바로 2D로 연다.
   // 주소로 강제한 경우(측정 중)는 내리지 않는다
@@ -89,7 +91,11 @@ export default function App() {
   }
 
   return (
-    <div className="stage" data-three={threeReady ? "ready" : undefined}>
+    <div
+      className="stage"
+      data-three={threeReady ? "ready" : undefined}
+      data-look-up={lookingUp && scene === "stop" ? "" : undefined}
+    >
       {renderer === "3d" && (
         <Suspense fallback={null}>
           <Stage3D
@@ -99,6 +105,7 @@ export default function App() {
             debug={DEBUG}
             onReady={() => setThreeReady(true)}
             onPerf={handlePerf}
+            onLookUp={setLookingUp}
           />
         </Suspense>
       )}

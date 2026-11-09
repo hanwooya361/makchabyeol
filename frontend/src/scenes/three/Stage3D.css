@@ -11,6 +11,8 @@
 
 .three canvas {
   display: block;
+  /* 폰에서 끌어 카메라를 돌릴 때 페이지가 스크롤·확대되지 않게 */
+  touch-action: none;
 }
 
 .stage[data-three="ready"] .scenes,
@@ -42,6 +44,22 @@
 
 .stage[data-three="ready"] .scene--stop :is(button, a) {
   pointer-events: auto;
+}
+
+/* 위를 많이 올려다보면 "하늘 보기"가 가로등 빛으로 살짝 숨 쉰다. 넘어가는 건 사용자가 누를 때만 */
+.stage[data-look-up] .stop__sky-link {
+  color: var(--lamp-light);
+  animation: sky-hint 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes sky-hint {
+  from {
+    text-shadow: 0 0 0 transparent;
+  }
+
+  to {
+    text-shadow: 0 0 12px rgb(246 199 107 / 70%);
+  }
 }
 
 .three__fps {

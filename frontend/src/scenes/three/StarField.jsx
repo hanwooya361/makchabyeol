@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { useThree } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Color, Euler, Object3D, SRGBColorSpace, Vector3 } from "three";
 
 const RADIUS = 30;
@@ -96,13 +96,20 @@ function OtherStars({ stars, origin, pitch }) {
 
 // 내 별은 3D로 그리지 않는다. 걱정이 점으로 모여 올라간 HTML 별(Sky.jsx)이 그대로 내 별로 남는다.
 // 하늘에 있는 동안 카메라가 움직이지 않으니 겉보기가 같고, 다른 별로 바꿔치기하는 순간이 없다(T21)
-export default function StarField({ stars, origin, pitch }) {
+const ORIGIN = new Vector3();
+
+// 별 묶음은 카메라 위치를 따라다닌다(하늘 상자처럼). 어디 서 있든 하늘이 같고,
+// 하늘 시점(정면, pitch)에서 서버 좌표가 2D와 같은 화면 자리에 온다
+export default function StarField({ stars, pitch }) {
+  const origin = ORIGIN;
+  const group = useRef(null);
+  useFrame(({ camera }) => group.current.position.copy(camera.position));
   // 별 자리는 InstancedMesh를 직접 고쳐서 바꾸므로 R3F가 모른다. 바뀌면 한 번 다시 그리게 알린다
   const invalidate = useThree((state) => state.invalidate);
   useEffect(() => invalidate(), [stars, invalidate]);
 
   return (
-    <group>
+    <group ref={group}>
       <BackgroundStars origin={origin} />
       <OtherStars stars={stars} origin={origin} pitch={pitch} />
     </group>
