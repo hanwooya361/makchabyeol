@@ -23,6 +23,12 @@ export function postStar(visitorId) {
   return request("/api/v1/stars", { visitorId });
 }
 
+// "오늘도 버텼다" 도장. 같은 밤에 또 찍으면 서버가 200 firstToday:false를 주는데,
+// 화면 문구는 기기에 남은 기록으로 이미 정해져 있어서 응답을 보지 않는다
+export function postCardTap(visitorId) {
+  return request("/api/v1/card-taps", { visitorId });
+}
+
 // 오늘 밤 하늘. 실패하면 null이고, 화면은 숫자 없는 문구로 버틴다
 export function getNight() {
   return request("/api/v1/night");

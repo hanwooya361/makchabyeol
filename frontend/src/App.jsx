@@ -5,7 +5,7 @@ import { nightDate } from "./lib/night.js";
 import { readTapNight, writeTapNight } from "./lib/stamp.js";
 import { visitorId } from "./lib/visitor.js";
 import { useNight } from "./lib/useNight.js";
-import { postStar } from "./api/client.js";
+import { postCardTap, postStar } from "./api/client.js";
 import { isCrisis } from "./safety/crisis.js";
 import HelpCard from "./components/HelpCard.jsx";
 
@@ -32,12 +32,14 @@ export default function App() {
   // 하늘에 올라온 동안만 폴링한다. 정류장에서는 서버를 부를 이유가 없다
   const { night, slow } = useNight(scene === "sky");
 
-  // 서버 기록은 T10. 지금은 기기에만 남긴다.
+  // 문구는 기기에 남은 기록으로 바로 정한다. 서버 기록은 뒤에서 따라가고 기다리지 않는다 —
+  // 잠든 서버 때문에 "삑"이 늦으면 의식이 깨진다(설계 2장 S1 로딩)
   function handleCardTap() {
     const tonight = nightDate();
     const already = readTapNight() === tonight;
     if (!already) writeTapNight(tonight);
     setTapped(already ? "again" : "first");
+    postCardTap(visitorId());
     // 찍힌 느낌을 1초 보여준 뒤 하늘로 올린다(설계 3장).
     // App은 사는 동안 안 사라지니 타이머를 치울 일도 없다
     setTimeout(() => setScene("sky"), 1000);

@@ -18,12 +18,14 @@ class SchemaMigrationTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    // 메모리 DB 하나를 테스트 전체가 나눠 쓴다. 여기서 보려는 건 "테이블이 있는가"뿐이라
+    // 개수가 아니라 조회가 되는지만 본다. 0을 기대하면 먼저 돈 테스트가 남긴 행에 걸린다
     @Test
     void 세_테이블이_만들어진다() {
-        assertThat(jdbc.queryForObject("select count(*) from star", Integer.class)).isZero();
-        assertThat(jdbc.queryForObject("select count(*) from card_tap", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("select count(*) from star", Integer.class)).isNotNull();
+        assertThat(jdbc.queryForObject("select count(*) from card_tap", Integer.class)).isNotNull();
         assertThat(jdbc.queryForObject("select count(*) from crisis_event", Integer.class))
-                .isZero();
+                .isNotNull();
     }
 
     @Test

@@ -10,6 +10,8 @@ dist/
 # 백엔드
 .gradle/
 build/
+# VS Code Java 확장이 따로 만드는 .class 출력물 (Gradle의 build/와 별개)
+bin/
 !gradle/wrapper/gradle-wrapper.jar
 
 # IDE
