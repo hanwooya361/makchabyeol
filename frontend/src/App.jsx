@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import Stop from "./scenes/Stop.jsx";
 import Sky from "./scenes/Sky.jsx";
 import { nightDate } from "./lib/night.js";
@@ -8,6 +8,12 @@ import { useNight } from "./lib/useNight.js";
 import { postCardTap, postCrisisEvent, postStar } from "./api/client.js";
 import { isCrisis } from "./safety/crisis.js";
 import HelpCard from "./components/HelpCard.jsx";
+import { detectRenderer, isDebug } from "./lib/renderer.js";
+
+// 3D 코드는 따로 쪼개 3D로 가는 사람만 받는다. 받는 동안은 2D가 대체 화면으로 보인다(설계 8장)
+const Stage3D = lazy(() => import("./scenes/three/Stage3D.jsx"));
+const RENDERER = detectRenderer();
+const DEBUG = isDebug(window.location.search);
 
 // 의식 시간은 설계 3장(0.8 + 1.5 + 0.5초). 모션 줄이기에서는 애니메이션이 없으니 기다릴 이유도 없다
 const RITUAL_MS = 2800;
@@ -28,6 +34,8 @@ export default function App() {
   const [help, setHelp] = useState(null);
   // 위기 카드는 한 세션에 한 번만. 나중에 붙일 후원 링크도 이 세션에서는 숨긴다(prd M4)
   const [crisisSeen, setCrisisSeen] = useState(false);
+  // 3D 캔버스가 만들어지면 2D 그림을 숨긴다. 그 전까지는 2D가 그대로 보인다
+  const [threeReady, setThreeReady] = useState(false);
 
   // 하늘에 올라온 동안만 폴링한다. 정류장에서는 서버를 부를 이유가 없다
   const { night, slow } = useNight(scene === "sky");
@@ -65,7 +73,19 @@ export default function App() {
   }
 
   return (
-    <div className="stage">
+    <div className="stage" data-three={threeReady ? "ready" : undefined}>
+      {RENDERER === "3d" && (
+        <Suspense fallback={null}>
+          <Stage3D
+            scene={scene}
+            night={night}
+            released={released}
+            phase={skyPhase}
+            debug={DEBUG}
+            onReady={() => setThreeReady(true)}
+          />
+        </Suspense>
+      )}
       {/* 화면 밖 장면은 inert로 포커스·스크린리더에서 뺀다. 하늘이 먼저 와야
           전환 중에 정류장이 그 위를 덮으며 내려간다(DOM 뒤쪽이 위에 그려짐) */}
       <main className="scenes" data-scene={scene}>

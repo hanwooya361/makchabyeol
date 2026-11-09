@@ -1,0 +1,45 @@
+/* 3D 캔버스는 무대 맨 아래에 깔리고, 2D 장면의 HTML 글자·버튼이 그 위에 뜬다.
+   3D가 준비되기 전(data-three 없음)에는 2D가 그대로 보인다 — 로딩 중 대체 화면 */
+.stage {
+  position: relative;
+}
+
+.three {
+  position: absolute;
+  inset: 0;
+}
+
+.three canvas {
+  display: block;
+}
+
+.stage[data-three="ready"] .scenes,
+.stage[data-three="ready"] .footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* 그림은 3D가 그리니 2D 그림만 숨긴다. visibility라 자리는 남아 버튼 위치가 그대로다 */
+.stage[data-three="ready"] .scene--stop,
+.stage[data-three="ready"] .scene--sky {
+  background: none;
+}
+
+.stage[data-three="ready"] .stop__art,
+.stage[data-three="ready"] .sky__others,
+.stage[data-three="ready"] .is-done .sky__my-star {
+  visibility: hidden;
+}
+
+.three__fps {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  margin: 0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 60%);
+  font: 12px/1.4 monospace;
+  pointer-events: none;
+}
