@@ -1,6 +1,5 @@
 /* S1 정류장. 기준 화면 360×780, 색·치수 근거는 docs/screen-design.md 2·4·5장 */
 .scene--stop {
-  position: relative;
   padding: 24px 16px 0;
   background: radial-gradient(120% 70% at 50% 0%, #16203c 0%, var(--night-sky) 70%);
 }

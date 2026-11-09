@@ -2,6 +2,12 @@
 
 각 작업 끝에 무엇을 왜 했는지 3줄로 남겨요. 최신 항목이 위로 와요.
 
+## 2026-11-09 · T04 하늘 전환(S2)
+
+- 전환은 CSS 한 덩어리로 끝냄. 두 장면을 `.scenes` 안에 겹쳐 두고 `data-scene`에 따라 `translateY(±100%)`만 바꾼다(1.2초 ease-in-out). JS 애니메이션·라이브러리·라우팅이 없고, `App.jsx`가 가진 건 `scene` 문자열 하나와 "찍고 1초 뒤 올라간다"는 `setTimeout` 한 줄뿐
+- 모션 줄이기는 global.css의 `*` 규칙이 transition을 0.01ms로 죽여서 설계의 0.4초 페이드까지 같이 사라졌음. 같은 블록 안에 `.scene`(선택자가 `*`보다 구체적이라 !important 싸움에서 이김)로 `transform: none` + `opacity 0.4s` 예외를 둬서, 이동만 빠지고 페이드는 남게 함. 헤드리스에서 두 모드 다 확인
+- 화면 밖 장면은 React 19 `inert` prop 하나로 포커스·스크린리더에서 뺌(Tab이 안 보이는 "카드를 대 주세요"로 가던 문제). 그 과정에서 T02 때 남은 `.scene--stop { position: relative }`가 새 `position: absolute`를 덮어 S1이 화면 높이를 197px 못 채우던 것을 발견해 지움. 360×(420~1200) 다섯 높이에서 오버플로 0·푸터 보임
+
 ## 2026-11-07 · VS Code Gradle import가 Java 25를 잡는 문제
 
 - VS Code가 "Can't use Java 25.0.4.1 and Gradle 8.14.3"로 import를 거부함. 범인은 설치한 JDK가 아니라 **Red Hat Java 확장에 딸려 오는 번들 JRE**(`~/.vscode/extensions/redhat.java-1.58.0-win32-x64/jre/25.0.4.1`)였음. 확장이 그걸로 Gradle 데몬을 띄우는데 Gradle 8.14.3이 Java 25를 모름. 터미널 `gradlew.bat`은 JAVA_HOME(17) 데몬 + toolchain 21로 멀쩡히 돌고 있었으므로 깨진 건 IDE 쪽 하나뿐이었음

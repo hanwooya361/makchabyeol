@@ -8,9 +8,9 @@ const FEEDBACK = {
 // S1 정류장. 실루엣은 장식이라 SVG를 통째로 aria-hidden 하고,
 // 읽어야 하는 글자는 모두 HTML로 올린다(대비·글자 크기 조절·스크린리더).
 // 오늘 이미 찍었는지 판단하는 건 App.jsx와 lib/의 몫이고, 여기선 받아서 그리기만 한다.
-export default function Stop({ tapped, onCardTap }) {
+export default function Stop({ inert, tapped, onCardTap, onSkyLink }) {
   return (
-    <main className="scene scene--stop">
+    <section className="scene scene--stop" inert={inert}>
       <p className="stop__sign">
         막차까지 <span className="stop__sign-infinity">∞</span>분
       </p>
@@ -80,10 +80,9 @@ export default function Stop({ tapped, onCardTap }) {
         )}
       </p>
 
-      {/* shortcut: 아직 아무 동작 없는 버튼, T04에서 하늘(S2) 전환을 연결한다 */}
-      <button type="button" className="stop__sky-link">
+      <button type="button" className="stop__sky-link" onClick={onSkyLink}>
         하늘 보기 <span aria-hidden="true">↑</span>
       </button>
-    </main>
+    </section>
   );
 }

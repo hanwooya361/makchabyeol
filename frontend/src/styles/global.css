@@ -39,14 +39,32 @@ body {
   flex-direction: column;
 }
 
-/* 무대 높이가 화면에 묶여 있으므로 장면은 줄어들 수 있어야 한다.
+/* 장면들은 무대 안에서 겹쳐 있고, 전환은 위아래로 미는 것뿐이다(설계 3장: 1.2초).
+   무대 높이가 화면에 묶여 있으므로 장면은 줄어들 수 있어야 하고,
    글이 긴 장면(S5·S6)은 넘치면 스스로 스크롤한다 */
-.scene {
+.scenes {
+  position: relative;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  transition: transform 1.2s ease-in-out;
+}
+
+/* 하늘을 볼 때는 정류장이 아래로 내려가고, 정류장에 있을 때는 하늘이 위에서 기다린다 */
+.scenes[data-scene="sky"] .scene--stop {
+  transform: translateY(100%);
+}
+
+.scenes[data-scene="stop"] .scene--sky {
+  transform: translateY(-100%);
 }
 
 .footer {
@@ -66,5 +84,17 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* 위 규칙이 장면 전환까지 없애 버리므로, 이동만 빼고 페이드 0.4초는 남긴다(설계 3장).
+     `*`보다 선택자가 구체적이라 !important 끼리의 싸움에서 이긴다 */
+  .scene {
+    transform: none !important;
+    transition: opacity 0.4s !important;
+  }
+
+  .scenes[data-scene="sky"] .scene--stop,
+  .scenes[data-scene="stop"] .scene--sky {
+    opacity: 0;
   }
 }

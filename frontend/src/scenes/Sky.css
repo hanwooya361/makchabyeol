@@ -1,0 +1,32 @@
+/* S2 하늘. 색·치수 근거는 docs/screen-design.md 2·4장 */
+.scene--sky {
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(1.6px 1.6px at 18% 22%, var(--star-light) 50%, transparent 50%),
+    radial-gradient(1.2px 1.2px at 74% 14%, var(--star-light) 50%, transparent 50%),
+    radial-gradient(1.4px 1.4px at 42% 48%, var(--star-light) 50%, transparent 50%),
+    radial-gradient(1px 1px at 88% 62%, var(--star-light) 50%, transparent 50%),
+    radial-gradient(1.2px 1.2px at 9% 71%, var(--star-light) 50%, transparent 50%),
+    radial-gradient(1px 1px at 61% 85%, var(--star-light) 50%, transparent 50%),
+    radial-gradient(130% 80% at 50% 0%, #121a38 0%, var(--night-sky) 75%);
+}
+
+.sky__prompt {
+  margin: 0;
+  font-family: "Gowun Batang", serif;
+  font-size: 1.125rem;
+  line-height: 1.8;
+  text-align: center;
+  animation: sky-prompt-in 0.4s ease-out;
+}
+
+@keyframes sky-prompt-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
