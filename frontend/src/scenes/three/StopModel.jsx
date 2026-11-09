@@ -22,11 +22,13 @@ export default function StopModel() {
 
   return (
     <group>
-      {/* 바닥 */}
+      {/* 바닥: 멀리까지 차도, 정류장이 선 보도, 그 사이 연석. 정류장이 "길가"에 서 있게 */}
       <mesh rotation-x={-Math.PI / 2}>
         <planeGeometry args={[60, 60]} />
-        <meshLambertMaterial color="#141c38" />
+        <meshLambertMaterial color="#161f45" />
       </mesh>
+      <Block position={[0, 0.03, -0.6]} size={[60, 0.06, 4.8]} color="#232c50" />
+      <Block position={[0, 0.06, 1.85]} size={[60, 0.12, 0.16]} color="#3a4569" />
 
       {/* 정류장: 지붕, 뒤판, 기둥 둘 */}
       <Block position={[0.6, 2.6, 0]} size={[3.6, 0.14, 1.5]} />
@@ -57,8 +59,10 @@ export default function StopModel() {
         <meshBasicMaterial color="#fff4d6" />
       </mesh>
 
-      {/* 빛은 가로등 하나뿐. 그림자는 끔(폰 성능) */}
-      <pointLight position={LAMP_POS} color={LAMP} intensity={9} distance={9} decay={1.6} />
+      {/* 따뜻한 빛은 가로등 하나뿐. 지붕 밑 벤치까지 닿게 범위를 잡는다. 그림자는 끔(폰 성능) */}
+      <pointLight position={LAMP_POS} color={LAMP} intensity={14} distance={12} decay={1.4} />
+      {/* 아주 약한 푸른 달빛. 지붕·기둥 모서리가 밤하늘과 구분될 만큼만 */}
+      <directionalLight position={[6, 10, 4]} color="#8fa4d8" intensity={0.35} />
 
       {/* 전구 후광과 바닥에 번지는 빛. 더해 그리기라 어두운 데서만 밝아 보인다 */}
       <sprite position={LAMP_POS} scale={1.6}>
@@ -71,13 +75,14 @@ export default function StopModel() {
           depthWrite={false}
         />
       </sprite>
-      <mesh position={[LAMP_POS[0] + 0.3, 0.01, LAMP_POS[2]]} rotation-x={-Math.PI / 2}>
-        <planeGeometry args={[4.5, 4.5]} />
+      {/* 낮은 카메라에서는 바닥 빛이 납작하게 눌려 보여서 카메라 쪽으로 길게 늘인다 */}
+      <mesh position={[LAMP_POS[0] + 0.6, 0.07, 1.6]} rotation-x={-Math.PI / 2}>
+        <planeGeometry args={[6, 9]} />
         <meshBasicMaterial
           map={glow}
           color={LAMP}
           transparent
-          opacity={0.35}
+          opacity={0.45}
           blending={AdditiveBlending}
           depthWrite={false}
         />

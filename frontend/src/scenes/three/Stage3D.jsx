@@ -110,7 +110,6 @@ export default function Stage3D({ scene, night, released, phase, debug, onReady,
   const fpsText = useRef(null);
   function showFps(fps, worst) {
     fpsText.current.textContent = `${fps} fps · 가장 긴 프레임 ${worst}ms`;
-    window.__fps = { fps, worst }; // 헤드리스 측정이 읽어 간다
   }
   const serverStars = useMemo(() => night?.stars ?? [], [night]);
   const stars = useMemo(() => (debug ? fillTo300(serverStars) : serverStars), [debug, serverStars]);
