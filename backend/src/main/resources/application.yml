@@ -5,6 +5,10 @@ spring:
     default: local
   jpa:
     open-in-view: false
+    hibernate:
+      # 스키마 주인은 Flyway 하나다. H2는 기본값이 create-drop이라 명시하지 않으면
+      # Hibernate가 Flyway가 만든 테이블을 갈아엎는다
+      ddl-auto: validate
 
 app:
   allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
@@ -33,6 +37,3 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: validate
