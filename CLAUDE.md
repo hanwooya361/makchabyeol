@@ -23,7 +23,7 @@
 - 위로가 목적: 카피는 다정하고 짧게, 가르치거나 훈계하지 않음
 - 익명·최소 수집: 개인정보는 꼭 필요한 것만, 저장 전에 이유를 설명. 걱정 원문은 서버로 보내지 않음
 - 안전: 사용자 입력에 자해·자살 암시가 있으면 109(자살예방상담전화) 안내를 띄우는 로직은 필수 기능
-- 장면/로직 분리: 그리는 코드는 `frontend/src/scenes/`에만(장면 전용 CSS도 `scenes/Stop.css`처럼 옆에), 의식 로직(밤 날짜, 익명 ID, 위기 키워드, API 호출, scene 상태)은 `scenes/` 밖에. 장면 컴포넌트는 props를 받아 그리고 콜백으로 알리기만 함. 출시 뒤 장면을 3D(React Three Fiber)로 통째로 갈아끼우기 위한 경계 (docs/tech-design.md 8장)
+- 장면/로직 분리: 그리는 코드는 `frontend/src/scenes/`에만(장면 전용 CSS도 `scenes/Stop.css`처럼 옆에), 의식 로직(밤 날짜, 익명 ID, 위기 키워드, API 호출, scene 상태)은 `scenes/` 밖에. 장면 컴포넌트는 props를 받아 그리고 콜백으로 알리기만 함. 출시 화면은 3D(React Three Fiber, `scenes/three/`), 2D 장면은 대체 화면으로 동결(버그 수정만) (docs/tech-design.md 8장)
 - 예외: 모든 장면에 걸리는 공통 UI(푸터, 위기 안내 카드)는 `scenes/` 밖(`App.jsx`·`components/`)에 두고 3D에서도 HTML로 유지함. 캔버스 안에는 DOM이 없어서 스크린리더·글자 크기 조절이 안 먹음
 - 비용: 월 고정비 0~1만원 안에서 운영 가능한 스택
 
@@ -37,7 +37,7 @@
 ## 참고 문서
 - docs/prd.md: 기능, 수용 기준(Given/When/Then), 비목표. 원본은 Claude 문서이며 이 파일은 개발용 사본
 - docs/screen-design.md: 화면 흐름, 카피, 애니메이션 시간, 팔레트, 접근성
-- docs/tech-design.md: ERD, API 명세, 보안, 폴더 구조, 환경변수, 티켓(T01~T16)과 완료 조건, 출시 뒤 3D 전환 계획(8장)
+- docs/tech-design.md: ERD, API 명세, 보안, 폴더 구조, 환경변수, 티켓(T01~T23)과 완료 조건, 3D 장면 계획과 완료 조건(8장)
 - 작업 전에 관련 문서를 읽고, 설계와 코드가 어긋나면 고치기 전에 먼저 알려줌
 
 ## 작업 방식
