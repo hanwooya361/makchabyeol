@@ -29,6 +29,12 @@ export function postCardTap(visitorId) {
   return request("/api/v1/card-taps", { visitorId });
 }
 
+// 위기 안내 카드가 한 번 떴다는 사실만 보낸다. 원문도 방문자 ID도 싣지 않는다.
+// 빈 {}는 request()가 POST로 보내게 하려는 것뿐이고, 서버는 본문을 읽지 않는다
+export function postCrisisEvent() {
+  return request("/api/v1/crisis-events", {});
+}
+
 // 오늘 밤 하늘. 실패하면 null이고, 화면은 숫자 없는 문구로 버틴다
 export function getNight() {
   return request("/api/v1/night");

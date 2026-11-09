@@ -5,7 +5,7 @@ import { nightDate } from "./lib/night.js";
 import { readTapNight, writeTapNight } from "./lib/stamp.js";
 import { visitorId } from "./lib/visitor.js";
 import { useNight } from "./lib/useNight.js";
-import { postCardTap, postStar } from "./api/client.js";
+import { postCardTap, postCrisisEvent, postStar } from "./api/client.js";
 import { isCrisis } from "./safety/crisis.js";
 import HelpCard from "./components/HelpCard.jsx";
 
@@ -56,7 +56,11 @@ export default function App() {
     postStar(visitorId());
     setTimeout(() => {
       setSkyPhase("done");
-      if (crisis) setHelp("crisis");
+      // 집계는 카드가 실제로 보이는 순간에. 의식 도중 창을 닫아 못 본 경우는 세지 않는다
+      if (crisis) {
+        setHelp("crisis");
+        postCrisisEvent();
+      }
     }, ritualMs());
   }
 

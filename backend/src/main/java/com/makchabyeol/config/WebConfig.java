@@ -30,5 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/v1/stars");
         registry.addInterceptor(new RateLimitInterceptor(10, RateLimitedException::requests))
                 .addPathPatterns("/api/v1/card-taps");
+        registry.addInterceptor(new RateLimitInterceptor(10, RateLimitedException::requests))
+                .addPathPatterns("/api/v1/crisis-events");
     }
 }
