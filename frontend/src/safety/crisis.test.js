@@ -26,10 +26,30 @@ test("영문은 대소문자를 가리지 않는다", () => {
   assert.equal(isCrisis("Suicide"), true);
 });
 
+test("T16에서 보탠 오타·속어·돌려 말하기도 잡는다", () => {
+  for (const text of [
+    "죽고십다",
+    "그냥 뒤지고 싶다",
+    "디지고싶어",
+    "내가 죽었으면 좋겠어",
+    "내가 죽어야 끝나나",
+    "목숨을 끊고 싶어",
+    "생을 마감하고 싶다",
+    "다 끝내고 싶어요",
+    "모든 걸 끝내고 싶다",
+    "이제 그만 살고 싶어",
+    "태어나지 말았어야 했어",
+  ]) {
+    assert.equal(isCrisis(text), true, text);
+  }
+});
+
 test("평범한 걱정은 그냥 지나간다", () => {
   assert.equal(isCrisis(""), false);
   assert.equal(isCrisis("내일 발표가 무서워요"), false);
   assert.equal(isCrisis("요즘 잠이 잘 안 와요"), false);
   assert.equal(isCrisis("다들 앞서가는 것 같아요"), false);
   assert.equal(isCrisis("오늘 일 다 끝내고 집에 왔어요"), false);
+  assert.equal(isCrisis("이번 주 안에 과제 다 끝내야 해요"), false);
+  assert.equal(isCrisis("열심히 살자고 다짐했는데 잘 안 돼요"), false);
 });

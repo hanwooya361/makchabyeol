@@ -50,6 +50,8 @@
   width: 100%;
   height: auto;
   max-height: 100%;
+  /* 가로등 빛이 그림 틀 밖으로 번져야 네모나게 잘리지 않는다 */
+  overflow: visible;
 }
 
 /* 교통카드 단말기. 버튼이라 탭·Enter·Space가 공짜로 따라온다 */

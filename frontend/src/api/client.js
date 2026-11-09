@@ -1,7 +1,10 @@
 // 서버로 가는 건 익명 ID와 "별을 띄웠다"는 사실뿐이다. 걱정 원문은 이 파일을 지나가지 않는다.
 // 의식은 서버를 기다리지 않는다(Render 무료 서버는 잠들어 있을 수 있음). 실패하면 조용히 null.
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
-const TIMEOUT_MS = 15000;
+// Render 무료 서버는 깨는 데 50초쯤 걸린다. 화면은 응답을 기다리지 않으니 넉넉히 기다려야
+// 잠든 서버를 만난 첫 방문자의 별·도장도 저장된다(T16: 15초였을 땐 전부 버려짐).
+// shortcut: 서버가 깨기 전에 탭을 닫으면 그 요청은 사라진다. 누락이 눈에 띄면 keepalive나 재전송 큐로
+const TIMEOUT_MS = 70000;
 
 async function request(path, body) {
   try {
