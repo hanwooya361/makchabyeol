@@ -73,9 +73,17 @@ body {
   font-size: 0.875rem;
 }
 
-.footer a {
+/* 도움받을 곳은 카드를 여는 버튼이지만 푸터 링크처럼 보여야 한다 */
+.footer a,
+.footer button {
+  border: 0;
+  padding: 0;
+  background: none;
   color: var(--star-light);
+  font: inherit;
   opacity: 0.8;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,64 @@
+/* 안내 카드. 네이티브 <dialog>라 화면 가운데 띄우기와 backdrop은 브라우저가 해 준다 */
+.help {
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  padding: 24px;
+  border: 1px solid rgb(246 199 107 / 0.35);
+  border-radius: 16px;
+  background: var(--stop-shadow);
+  color: var(--star-light);
+}
+
+.help::backdrop {
+  background: rgb(14 21 48 / 0.72);
+}
+
+.help__title {
+  margin: 0 0 8px;
+  font-family: "Gowun Batang", serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.help__body {
+  margin: 0 0 20px;
+  font-size: 0.9375rem;
+}
+
+.help__list {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.help__action {
+  display: block;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--lamp-light);
+  color: var(--night-sky);
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+.help__note {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.help__close {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  background: none;
+  color: var(--star-light);
+  font: inherit;
+  opacity: 0.8;
+  cursor: pointer;
+}

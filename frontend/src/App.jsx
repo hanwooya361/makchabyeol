@@ -6,6 +6,8 @@ import { readTapNight, writeTapNight } from "./lib/stamp.js";
 import { visitorId } from "./lib/visitor.js";
 import { useNight } from "./lib/useNight.js";
 import { postStar } from "./api/client.js";
+import { isCrisis } from "./safety/crisis.js";
+import HelpCard from "./components/HelpCard.jsx";
 
 // 의식 시간은 설계 3장(0.8 + 1.5 + 0.5초). 모션 줄이기에서는 애니메이션이 없으니 기다릴 이유도 없다
 const RITUAL_MS = 2800;
@@ -22,6 +24,10 @@ export default function App() {
   const [scene, setScene] = useState("stop");
   const [skyPhase, setSkyPhase] = useState("ask");
   const [released, setReleased] = useState(false);
+  // 안내 카드: null | "crisis"(S4) | "help"(S5). 닫으면 다시 null
+  const [help, setHelp] = useState(null);
+  // 위기 카드는 한 세션에 한 번만. 나중에 붙일 후원 링크도 이 세션에서는 숨긴다(prd M4)
+  const [crisisSeen, setCrisisSeen] = useState(false);
 
   // 하늘에 올라온 동안만 폴링한다. 정류장에서는 서버를 부를 이유가 없다
   const { night, slow } = useNight(scene === "sky");
@@ -37,14 +43,19 @@ export default function App() {
     setTimeout(() => setScene("sky"), 1000);
   }
 
-  // 걱정 원문은 Sky의 state에서 여기까지만 온다. 서버로는 익명 ID만 간다.
-  // 애니메이션은 서버 응답을 기다리지 않는다 — 저장이 실패해도 별은 뜬다(설계 3장).
-  // 원문을 받는 자리는 T09 위기 키워드 검사가 쓴다
-  function handleRelease() {
+  // 걱정 원문은 Sky의 state에서 여기까지만 온다. 검사도 브라우저 안에서 하고, 서버로는 익명 ID만 간다.
+  // 애니메이션은 서버 응답을 기다리지 않는다 — 저장이 실패해도 별은 뜬다(설계 3장)
+  function handleRelease(text) {
+    // 카드는 별이 다 뜬 뒤에 띄운다. 의식을 끊지 않는다(prd M4)
+    const crisis = !crisisSeen && isCrisis(text);
+    if (crisis) setCrisisSeen(true);
     setReleased(true);
     setSkyPhase("releasing");
     postStar(visitorId());
-    setTimeout(() => setSkyPhase("done"), ritualMs());
+    setTimeout(() => {
+      setSkyPhase("done");
+      if (crisis) setHelp("crisis");
+    }, ritualMs());
   }
 
   return (
@@ -70,8 +81,12 @@ export default function App() {
         />
       </main>
       <footer className="footer">
-        <a href="#help">도움받을 곳</a>
+        <button type="button" onClick={() => setHelp("help")}>
+          도움받을 곳
+        </button>
       </footer>
+      {/* 열릴 때만 그린다. 마운트되면 스스로 모달이 되고, Esc나 닫기 버튼이 onClose로 돌아온다 */}
+      {help && <HelpCard variant={help} onClose={() => setHelp(null)} />}
     </div>
   );
 }
