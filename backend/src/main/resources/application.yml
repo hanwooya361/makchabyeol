@@ -3,17 +3,17 @@ spring:
     name: makchabyeol
   profiles:
     default: local
-
-server:
-  # Render 프록시 뒤에서 진짜 사용자 IP를 보기 위해. 안 하면 모두가 프록시 IP 하나로 보여 IP 한도를 나눠 쓴다.
-  # Tomcat은 내부망 프록시가 붙인 X-Forwarded-For만 믿어서, 사용자가 헤더를 위조해도 통하지 않는다
-  forward-headers-strategy: native
   jpa:
     open-in-view: false
     hibernate:
       # 스키마 주인은 Flyway 하나다. H2는 기본값이 create-drop이라 명시하지 않으면
       # Hibernate가 Flyway가 만든 테이블을 갈아엎는다
       ddl-auto: validate
+
+server:
+  # Render 프록시 뒤에서 진짜 사용자 IP를 보기 위해. 안 하면 모두가 프록시 IP 하나로 보여 IP 한도를 나눠 쓴다.
+  # Tomcat은 내부망 프록시가 붙인 X-Forwarded-For만 믿어서, 사용자가 헤더를 위조해도 통하지 않는다
+  forward-headers-strategy: native
 
 app:
   allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
