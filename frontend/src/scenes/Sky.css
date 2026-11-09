@@ -1,7 +1,9 @@
-/* S2 하늘. 색·치수 근거는 docs/screen-design.md 2·4장 */
+/* S2·S3 하늘. 색·시간 근거는 docs/screen-design.md 2·3·4장 */
 .scene--sky {
   justify-content: center;
+  align-items: center;
   padding: 24px;
+  text-align: center;
   background:
     radial-gradient(1.6px 1.6px at 18% 22%, var(--star-light) 50%, transparent 50%),
     radial-gradient(1.2px 1.2px at 74% 14%, var(--star-light) 50%, transparent 50%),
@@ -12,16 +14,140 @@
     radial-gradient(130% 80% at 50% 0%, #121a38 0%, var(--night-sky) 75%);
 }
 
+.sky__form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
 .sky__prompt {
   margin: 0;
   font-family: "Gowun Batang", serif;
   font-size: 1.125rem;
   line-height: 1.8;
-  text-align: center;
-  animation: sky-prompt-in 0.4s ease-out;
+  animation: sky-fade-in 0.4s ease-out;
 }
 
-@keyframes sky-prompt-in {
+.sky__field {
+  width: 100%;
+}
+
+/* 보이지는 않지만 스크린리더는 읽는다 */
+.sky__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sky__input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid rgb(255 244 214 / 35%);
+  border-radius: 0;
+  background: transparent;
+  color: var(--star-light);
+  font: inherit;
+  text-align: center;
+}
+
+.sky__input::placeholder {
+  color: rgb(255 244 214 / 40%);
+}
+
+.sky__input:focus-visible {
+  outline: 0;
+  border-bottom-color: var(--lamp-light);
+}
+
+/* 글자 수가 떴다 사라져도 버튼이 밀리지 않게 자리를 잡아 둔다 */
+.sky__count {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: 0.8125rem;
+  opacity: 0.7;
+}
+
+.sky__submit {
+  min-height: 44px;
+  padding: 10px 28px;
+  border: 1px solid rgb(246 199 107 / 45%);
+  border-radius: 24px;
+  background: transparent;
+  color: var(--lamp-light);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sky__submit:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.sky__submit:not(:disabled):hover,
+.sky__submit:focus-visible {
+  background: rgb(246 199 107 / 12%);
+}
+
+.sky__note {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  opacity: 0.7;
+}
+
+.sky__skip,
+.sky__back {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  color: var(--star-light);
+  font: inherit;
+  font-size: 0.9375rem;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.sky__skip:hover,
+.sky__skip:focus-visible,
+.sky__back:hover,
+.sky__back:focus-visible {
+  background: rgb(255 244 214 / 10%);
+}
+
+/* 의식: 글자가 한 점으로 모이고(0.8초) → 점이 올라가고(1.5초) → 반짝 뒤 고정(0.5초) */
+.is-releasing .sky__form {
+  animation: sky-collapse 0.8s ease-in forwards;
+}
+
+.sky__my-star {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--star-light);
+  box-shadow: 0 0 10px 3px rgb(255 244 214 / 55%);
+}
+
+.is-releasing .sky__my-star {
+  animation:
+    sky-rise 1.5s 0.8s ease-out backwards,
+    sky-twinkle 0.5s 2.3s ease-out;
+}
+
+@keyframes sky-fade-in {
   from {
     opacity: 0;
   }
@@ -29,4 +155,46 @@
   to {
     opacity: 1;
   }
+}
+
+@keyframes sky-collapse {
+  to {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(0.1);
+  }
+}
+
+@keyframes sky-rise {
+  from {
+    /* 입력창이 있던 자리(화면 가운데)에서 출발한다 */
+    transform: translateY(28vh) scale(0.6);
+    opacity: 0.2;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes sky-twinkle {
+  50% {
+    transform: scale(1.8);
+    box-shadow: 0 0 18px 6px rgb(255 244 214 / 75%);
+  }
+}
+
+.sky__after {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: sky-fade-in 0.4s ease-out;
+}
+
+.sky__closing {
+  margin: 0;
+  font-family: "Gowun Batang", serif;
+  font-size: 1.0625rem;
 }
