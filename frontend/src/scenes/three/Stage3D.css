@@ -4,8 +4,10 @@
   position: relative;
 }
 
+/* 3D는 PC·폰 모두 화면 전체. 글자·버튼(HTML)은 지금처럼 가운데 480px 열에 남아
+   위에는 전광판, 아래에는 버튼이 모인 메뉴 바처럼 보인다. 2D 대체 화면은 480px 무대 그대로 */
 .three {
-  position: absolute;
+  position: fixed;
   inset: 0;
 }
 
@@ -27,9 +29,22 @@
   background: none;
 }
 
-.stage[data-three="ready"] .stop__art,
 .stage[data-three="ready"] .sky__others {
   visibility: hidden;
+}
+
+/* 3D에서는 2D 그림 자리를 비우지 않고 빼서, 전광판은 맨 위·버튼은 맨 아래 메뉴 바처럼 모은다.
+   화면이 크든 작든 가운데의 3D 장면(캐릭터·정류장)을 글자가 가리지 않게 */
+.stage[data-three="ready"] .stop__art {
+  display: none;
+}
+
+.stage[data-three="ready"] .stop__sign {
+  margin: 0;
+}
+
+.stage[data-three="ready"] .stop__reader {
+  margin-top: auto;
 }
 
 /* 정류장에서는 빈 곳을 누르면 아래 3D 바닥까지 닿게(걷기). 버튼·링크는 그대로 눌린다 */

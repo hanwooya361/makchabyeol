@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
+import { fovFor } from "./fov.js";
 import { Color, Euler, Object3D, SRGBColorSpace, Vector3 } from "three";
 
 const RADIUS = 30;
@@ -25,8 +26,9 @@ function seeded(seed) {
 }
 
 function useFov() {
-  const { camera, size } = useThree();
-  const vfov = (camera.fov * Math.PI) / 180;
+  const { size } = useThree();
+  const aspect = size.width / size.height;
+  const vfov = (fovFor(aspect) * Math.PI) / 180;
   return { vfov, hfov: 2 * Math.atan(Math.tan(vfov / 2) * (size.width / size.height)) };
 }
 

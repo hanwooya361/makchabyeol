@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Euler, Vector3 } from "three";
+import { fovFor } from "./fov.js";
 
 // 3인칭 카메라(T22.1). 캐릭터 뒤쪽 위에서 따라오고, 끌어서 둘레를 돈다.
 // pitch는 "보는 각도"(+ 위, − 아래). 아래를 볼 때는 카메라가 올라가 캐릭터를 내려다보고,
@@ -98,7 +99,14 @@ export default function CameraRig({ up, me, onLookUp }) {
 
   useDragToLook(view, enabled, onLookUp);
 
-  useFrame(({ camera }, dt) => {
+  useFrame(({ camera, size }, dt) => {
+    // 화면 비율이 바뀌면(창 크기, 폰 회전) 시야각을 다시 맞춘다
+    const fov = fovFor(size.width / size.height);
+    if (camera.fov !== fov) {
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
+    }
+
     const step = Math.min(dt, 1 / 30); // 쉬다 깬 첫 프레임이 한 번에 건너뛰지 않게
     const goal = up ? 1 : 0;
     sky.current +=

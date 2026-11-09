@@ -4,6 +4,7 @@ import StopModel from "./StopModel.jsx";
 import StarField from "./StarField.jsx";
 import Walker, { START } from "./Walker.jsx";
 import CameraRig from "./CameraRig.jsx";
+import { fovFor } from "./fov.js";
 import "./Stage3D.css";
 
 // 3D 정류장·밤하늘(T17 시험 제작). 2D 장면과 같은 값을 받아 그리기만 한다.
@@ -94,9 +95,10 @@ export default function Stage3D({ scene, night, phase, debug, onReady, onPerf, o
     <div className="three" aria-hidden="true">
       <Canvas
         flat
+        // 큰 모니터에서도 픽셀을 1.5배까지만 그린다(4K에서 GPU가 버거워지지 않게)
         dpr={[1, 1.5]}
         gl={{ antialias: false, powerPreference: "high-performance" }}
-        camera={{ fov: 62, near: 0.1, far: 90 }}
+        camera={{ fov: fovFor(window.innerWidth / window.innerHeight), near: 0.1, far: 90 }}
         onCreated={({ gl }) => {
           // GPU가 캔버스를 빼앗기면(메모리 부족 등) 아주 느린 것과 같게 본다
           gl.domElement.addEventListener("webglcontextlost", () => onPerf(0));
