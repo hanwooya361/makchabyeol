@@ -18,8 +18,8 @@
   letter-spacing: 0.08em;
 }
 
-/* 2초마다 한 번 살짝 꺼지는 느낌. 모션 줄이기면 global.css가 멈춘다 */
-.stop__sign-infinity {
+/* 숫자가 2초마다 한 번 살짝 꺼지는 전광판 느낌. 모션 줄이기면 global.css가 멈춘다 */
+.stop__sign-minutes {
   display: inline-block;
   animation: sign-flicker 2s ease-in-out infinite;
 }

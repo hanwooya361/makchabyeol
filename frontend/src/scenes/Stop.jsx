@@ -9,7 +9,7 @@ const FEEDBACK = {
 // S1 정류장. 실루엣은 장식이라 SVG를 통째로 aria-hidden 하고,
 // 읽어야 하는 글자는 모두 HTML로 올린다(대비·글자 크기 조절·스크린리더).
 // 오늘 이미 찍었는지 판단하는 건 App.jsx와 lib/의 몫이고, 여기선 받아서 그리기만 한다.
-export default function Stop({ inert, tapped, onCardTap, onSkyLink }) {
+export default function Stop({ inert, bus, tapped, onCardTap, onSkyLink }) {
   const reader = useRef(null);
   const wasInert = useRef(inert);
 
@@ -23,7 +23,13 @@ export default function Stop({ inert, tapped, onCardTap, onSkyLink }) {
   return (
     <section className="scene scene--stop" inert={inert}>
       <p className="stop__sign">
-        막차까지 <span className="stop__sign-infinity">∞</span>분
+        {bus.phase === "stopped" ? (
+          "버스가 와 있어요"
+        ) : (
+          <>
+            다음 버스 <span className="stop__sign-minutes">{bus.minutes}</span>분
+          </>
+        )}
       </p>
 
       <div className="stop__art">

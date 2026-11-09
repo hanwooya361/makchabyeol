@@ -4,6 +4,7 @@ import StopModel from "./StopModel.jsx";
 import StarField from "./StarField.jsx";
 import Walker, { START } from "./Walker.jsx";
 import CameraRig from "./CameraRig.jsx";
+import Bus from "./Bus.jsx";
 import { fovFor } from "./fov.js";
 import "./Stage3D.css";
 
@@ -65,7 +66,7 @@ function fillTo300(stars) {
 }
 
 // 캔버스 안쪽(useFrame·useThree는 캔버스 안에서만 쓸 수 있어서 따로 둔다)
-function World({ up, stars, debug, onSample, onPerf, onLookUp }) {
+function World({ up, stars, bus, debug, onSample, onPerf, onLookUp }) {
   // 내 위치. 걷기(Walker)가 바꾸고 카메라(CameraRig)가 읽는다
   const me = useRef(START.clone());
   return (
@@ -76,6 +77,7 @@ function World({ up, stars, debug, onSample, onPerf, onLookUp }) {
       <StopModel />
       <StarField stars={stars} pitch={SKY_PITCH} />
       <Walker active={!up} me={me} />
+      <Bus bus={bus} me={me} />
       <CameraRig up={up} me={me} onLookUp={onLookUp} />
       <PerfCheck onPerf={onPerf} debug={debug} />
       {debug && <FpsProbe onSample={onSample} />}
@@ -83,7 +85,7 @@ function World({ up, stars, debug, onSample, onPerf, onLookUp }) {
   );
 }
 
-export default function Stage3D({ scene, night, phase, debug, onReady, onPerf, onLookUp }) {
+export default function Stage3D({ scene, night, phase, bus, debug, onReady, onPerf, onLookUp }) {
   const fpsText = useRef(null);
   function showFps(fps, worst) {
     fpsText.current.textContent = `${fps} fps · 가장 긴 프레임 ${worst}ms`;
@@ -109,6 +111,7 @@ export default function Stage3D({ scene, night, phase, debug, onReady, onPerf, o
           up={scene === "sky"}
           // 다른 사람 별은 2D처럼 의식이 끝난 뒤에만. 입력하는 동안 글자를 가리지 않게
           stars={phase === "done" ? stars : NO_STARS}
+          bus={bus}
           debug={debug}
           onSample={showFps}
           onPerf={onPerf}

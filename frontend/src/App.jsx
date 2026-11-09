@@ -5,6 +5,8 @@ import { nightDate } from "./lib/night.js";
 import { readTapNight, writeTapNight } from "./lib/stamp.js";
 import { visitorId } from "./lib/visitor.js";
 import { useNight } from "./lib/useNight.js";
+import { useBus } from "./lib/useBus.js";
+import { DWELL_MS, INTERVAL_MS } from "./lib/bus.js";
 import { postCardTap, postCrisisEvent, postStar } from "./api/client.js";
 import { isCrisis } from "./safety/crisis.js";
 import HelpCard from "./components/HelpCard.jsx";
@@ -57,6 +59,8 @@ export default function App() {
 
   // 하늘에 올라온 동안만 폴링한다. 정류장에서는 서버를 부를 이유가 없다
   const { night, slow } = useNight(scene === "sky");
+  // 버스 시간표는 기기 시계로. 전광판(2D·3D 공통)과 3D 버스가 같은 값을 본다
+  const bus = useBus();
 
   // 문구는 기기에 남은 기록으로 바로 정한다. 서버 기록은 뒤에서 따라가고 기다리지 않는다 —
   // 잠든 서버 때문에 "삑"이 늦으면 의식이 깨진다(설계 2장 S1 로딩)
@@ -102,6 +106,7 @@ export default function App() {
             scene={scene}
             night={night}
             phase={skyPhase}
+            bus={{ arriveAt: bus.arriveAt, dwellMs: DWELL_MS, intervalMs: INTERVAL_MS }}
             debug={DEBUG}
             onReady={() => setThreeReady(true)}
             onPerf={handlePerf}
@@ -124,6 +129,7 @@ export default function App() {
         />
         <Stop
           inert={scene !== "stop"}
+          bus={bus}
           tapped={tapped}
           onCardTap={handleCardTap}
           onSkyLink={() => setScene("sky")}
