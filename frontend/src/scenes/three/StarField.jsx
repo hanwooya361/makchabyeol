@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useThree } from "@react-three/fiber";
-import { AdditiveBlending, Color, Euler, Object3D, SRGBColorSpace, Vector3 } from "three";
-import { makeGlowTexture } from "./glow.js";
+import { Color, Euler, Object3D, SRGBColorSpace, Vector3 } from "three";
 
 const RADIUS = 30;
 const MAX_STARS = 300; // 서버가 내려주는 최대치(StarService.MAX_STARS)
@@ -95,46 +94,17 @@ function OtherStars({ stars, origin, pitch }) {
   );
 }
 
-// 내 별: 2D와 같은 자리(가로 가운데, 위에서 22%)
-function MyStar({ origin, pitch }) {
-  const glow = useMemo(() => makeGlowTexture(), []);
-  const { hfov, vfov } = useFov();
-  const position = useMemo(
-    () => skyPoint(500, 220, origin, pitch, hfov, vfov),
-    [origin, pitch, hfov, vfov],
-  );
-
-  return (
-    <group position={position}>
-      <mesh>
-        <icosahedronGeometry args={[0.16, 0]} />
-        <meshBasicMaterial color="#fff4d6" fog={false} />
-      </mesh>
-      <sprite scale={1.6}>
-        <spriteMaterial
-          map={glow}
-          color="#fff4d6"
-          transparent
-          opacity={0.6}
-          blending={AdditiveBlending}
-          depthWrite={false}
-          fog={false}
-        />
-      </sprite>
-    </group>
-  );
-}
-
-export default function StarField({ stars, showMine, origin, pitch }) {
+// 내 별은 3D로 그리지 않는다. 걱정이 점으로 모여 올라간 HTML 별(Sky.jsx)이 그대로 내 별로 남는다.
+// 하늘에 있는 동안 카메라가 움직이지 않으니 겉보기가 같고, 다른 별로 바꿔치기하는 순간이 없다(T21)
+export default function StarField({ stars, origin, pitch }) {
   // 별 자리는 InstancedMesh를 직접 고쳐서 바꾸므로 R3F가 모른다. 바뀌면 한 번 다시 그리게 알린다
   const invalidate = useThree((state) => state.invalidate);
-  useEffect(() => invalidate(), [stars, showMine, invalidate]);
+  useEffect(() => invalidate(), [stars, invalidate]);
 
   return (
     <group>
       <BackgroundStars origin={origin} />
       <OtherStars stars={stars} origin={origin} pitch={pitch} />
-      {showMine && <MyStar origin={origin} pitch={pitch} />}
     </group>
   );
 }

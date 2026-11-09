@@ -100,7 +100,7 @@ function fillTo300(stars) {
 }
 
 // 캔버스 안쪽. 화면 크기(useThree)를 알아야 카메라 자리를 정할 수 있어서 따로 둔다
-function World({ up, stars, showMine, debug, onSample, onPerf }) {
+function World({ up, stars, debug, onSample, onPerf }) {
   const eye = useEye();
   return (
     <>
@@ -108,7 +108,7 @@ function World({ up, stars, showMine, debug, onSample, onPerf }) {
       <fog attach="fog" args={["#0e1530", 12, 45]} />
       <ambientLight color="#3a4a7a" intensity={0.6} />
       <StopModel />
-      <StarField stars={stars} showMine={showMine} origin={eye} pitch={SKY_PITCH} />
+      <StarField stars={stars} origin={eye} pitch={SKY_PITCH} />
       <CameraRig up={up} eye={eye} />
       <PerfCheck onPerf={onPerf} debug={debug} />
       {debug && <FpsProbe onSample={onSample} />}
@@ -116,7 +116,7 @@ function World({ up, stars, showMine, debug, onSample, onPerf }) {
   );
 }
 
-export default function Stage3D({ scene, night, released, phase, debug, onReady, onPerf }) {
+export default function Stage3D({ scene, night, phase, debug, onReady, onPerf }) {
   const fpsText = useRef(null);
   function showFps(fps, worst) {
     fpsText.current.textContent = `${fps} fps · 가장 긴 프레임 ${worst}ms`;
@@ -141,7 +141,6 @@ export default function Stage3D({ scene, night, released, phase, debug, onReady,
           up={scene === "sky"}
           // 다른 사람 별은 2D처럼 의식이 끝난 뒤에만. 입력하는 동안 글자를 가리지 않게
           stars={phase === "done" ? stars : NO_STARS}
-          showMine={released && phase === "done"}
           debug={debug}
           onSample={showFps}
           onPerf={onPerf}

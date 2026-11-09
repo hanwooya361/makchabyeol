@@ -26,8 +26,7 @@
 }
 
 .stage[data-three="ready"] .stop__art,
-.stage[data-three="ready"] .sky__others,
-.stage[data-three="ready"] .is-done .sky__my-star {
+.stage[data-three="ready"] .sky__others {
   visibility: hidden;
 }
 

@@ -95,7 +95,6 @@ export default function App() {
           <Stage3D
             scene={scene}
             night={night}
-            released={released}
             phase={skyPhase}
             debug={DEBUG}
             onReady={() => setThreeReady(true)}
