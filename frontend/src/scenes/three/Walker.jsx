@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
+import Avatar from "./Avatar.jsx";
 
 // 내 캐릭터와 걷기(T22, T22.2). 걷기는 장식이라 의식 로직과 상관없다:
 // 걷지 않아도 별 띄우기·카드 찍기는 그대로다. 그래서 장면 안에서만 다룬다.
@@ -169,16 +170,9 @@ export default function Walker({ active, me }) {
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {/* 실루엣: 몸통(캡슐)과 머리. 등을 카메라 쪽으로 두고 정류장을 본다 */}
+      {/* 내 캐릭터. 등을 카메라 쪽으로 두고 정류장을 본다 */}
       <group ref={body} position={START.toArray()}>
-        <mesh position={[0, 0.55, 0]}>
-          <capsuleGeometry args={[0.17, 0.62, 3, 8]} />
-          <meshLambertMaterial color="#0b1024" flatShading />
-        </mesh>
-        <mesh position={[0, 1.22, 0]}>
-          <icosahedronGeometry args={[0.15, 1]} />
-          <meshLambertMaterial color="#0b1024" flatShading />
-        </mesh>
+        <Avatar />
       </group>
 
       {/* 누른 곳 표시: 걸어가는 동안만 */}
