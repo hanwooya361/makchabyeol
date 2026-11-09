@@ -90,6 +90,7 @@ export default function App() {
         <button type="button" onClick={() => setHelp("help")}>
           도움받을 곳
         </button>
+        <a href="/privacy.html">소개·개인정보</a>
       </footer>
       {/* 열릴 때만 그린다. 마운트되면 스스로 모달이 되고, Esc나 닫기 버튼이 onClose로 돌아온다 */}
       {help && <HelpCard variant={help} onClose={() => setHelp(null)} />}

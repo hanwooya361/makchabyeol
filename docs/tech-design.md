@@ -239,6 +239,7 @@ makchabyeol/
 | --- | --- | --- | --- |
 | VITE_API_BASE_URL | 프론트 | `http://localhost:8080` | API 주소 |
 | VITE_DONATION_URL | 프론트 | (비워 두면 후원 링크 숨김) | 외부 후원 링크 |
+| VITE_SITE_URL | 프론트 | `https://makchabyeol.<계정>.workers.dev` | og:image 전체 주소용. 빌드 때 박힘 |
 | SPRING_PROFILES_ACTIVE | 백엔드 | `local` / `prod` | local은 H2 메모리 DB |
 | DATABASE_URL | 백엔드 | `jdbc:postgresql://<host>/<db>?sslmode=require` | prod 전용 |
 | DATABASE_USERNAME | 백엔드 | | prod 전용 |
