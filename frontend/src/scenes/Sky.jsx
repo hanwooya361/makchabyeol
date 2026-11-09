@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./Sky.css";
+import { countMessage } from "./countMessage.js";
 
 // 예시는 돌려 가며 하나만 보여 준다. 매번 같은 문장이면 "이런 걸 쓰라는 건가" 싶어진다
 const PLACEHOLDERS = [
@@ -16,13 +17,6 @@ function pickPlaceholder() {
   return PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
 }
 
-// 숫자가 아직 없을 때도 할 말이 있어야 한다. 기다리는 동안 화면이 비어 있으면 더 외롭다
-function countMessage(night, slow) {
-  if (!night) return slow ? "오늘 밤에도 별이 뜨고 있어요." : null;
-  if (night.starCount < 5) return "오늘 밤 첫 별들 중 하나예요.";
-  return `오늘 밤 별 ${night.starCount}개가 떴어요. 혼자 기다리는 거 아니에요.`;
-}
-
 /**
  * S2 하늘·입력과 S3 별이 뜬 하늘. 같은 하늘이라 한 장면으로 두고 phase로 바꾼다.
  * phase: "ask"(입력) → "releasing"(띄우는 중) → "done"(내 별 고정)
@@ -34,6 +28,7 @@ export default function Sky({
   inert,
   phase,
   released,
+  faint,
   night,
   slow,
   onRelease,
@@ -119,7 +114,10 @@ export default function Sky({
       )}
 
       {/* 내 별. 올라가는 동안에도, 다 올라간 뒤에도 같은 자리에 있다 */}
-      {released && phase !== "ask" && <span className="sky__my-star" aria-hidden="true" />}
+      {released && phase !== "ask" && (
+        // "오늘은 맡길 게 없어요"를 고르면 글 없이 희미한 별 하나(T22.5)
+        <span className={faint ? "sky__my-star is-faint" : "sky__my-star"} aria-hidden="true" />
+      )}
 
       {phase === "done" && (
         <div className="sky__after">

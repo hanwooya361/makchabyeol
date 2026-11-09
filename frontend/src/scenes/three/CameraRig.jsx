@@ -83,7 +83,13 @@ function useDragToLook(view, enabled, onLookUp) {
   }, [gl, invalidate, view, enabled, onLookUp]);
 }
 
-export default function CameraRig({ up, me, onLookUp }) {
+// 버스에 타 있는 동안: 정류장 쪽으로 돌아가 조금 가까이서 버스를 본다(뒤 차도 쪽에 서면 버스 벽만 보인다).
+// 출발하면 정류장에서 배웅하는 모습이 된다
+const BUS_YAW = Math.PI;
+const BUS_DISTANCE = 2.8;
+
+export default function CameraRig({ up, me, inBus, onLookUp }) {
+  const dist = useRef(DISTANCE);
   const view = useRef({ yaw: 0, pitch: START_PITCH });
   const enabled = useRef(!up);
   const sky = useRef(up ? 1 : 0); // 0 정류장 ~ 1 하늘
@@ -118,6 +124,11 @@ export default function CameraRig({ up, me, onLookUp }) {
     target.current.lerp(want, 1 - Math.exp(-5 * step));
 
     // 하늘로 갈 땐 정해진 하늘 시점으로 섞는다
+    // 버스 안이면 정류장 쪽 시점으로 부드럽게 돈다(끌기로 다시 돌릴 수 있다)
+    const ease = 1 - Math.exp(-3 * step);
+    if (inBus) view.current.yaw += wrap(BUS_YAW - view.current.yaw) * ease;
+    const wantDist = inBus ? BUS_DISTANCE : DISTANCE;
+    dist.current += (wantDist - dist.current) * ease;
     const yaw = view.current.yaw + wrap(0 - view.current.yaw) * e;
     const pitch = view.current.pitch + (SKY_PITCH - view.current.pitch) * e;
 
@@ -129,10 +140,14 @@ export default function CameraRig({ up, me, onLookUp }) {
       Math.sin(elevation),
       Math.cos(yaw) * Math.cos(elevation),
     );
-    camera.position.copy(target.current).addScaledVector(pos, DISTANCE);
+    camera.position.copy(target.current).addScaledVector(pos, dist.current);
     camera.rotation.copy(euler.set(pitch, yaw, 0));
 
-    const settling = sky.current !== goal || target.current.distanceToSquared(want) > 1e-5;
+    const settling =
+      sky.current !== goal ||
+      target.current.distanceToSquared(want) > 1e-5 ||
+      Math.abs(wantDist - dist.current) > 0.01 ||
+      (inBus && Math.abs(wrap(BUS_YAW - view.current.yaw)) > 0.01);
     if (settling) invalidate();
   });
   return null;

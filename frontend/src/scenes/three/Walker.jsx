@@ -22,6 +22,11 @@ const POSTS = [
   [2.3, 0.6],
 ];
 const POST_RADIUS = 0.08 + BODY;
+// 버스 문 구역(T22.5): 문이 열려 있고 탈 수 있을 때만 앞문 앞(x 0.25~1.15)으로 버스 안(z 3.2)까지 열린다
+const DOOR = { minX: 0.25, maxX: 1.15, maxZ: 3.2, inside: 2.0 };
+const CURB = AREA.maxZ;
+const BOARD_SPOT = { x: 0.7, z: 2.6 };
+const OUT_SPOT_Z = 1.3; // 문이 닫히면 내려 주는 자리(문 앞 인도)
 const SPEED = 1.6; // m/s, 천천히 걷는 걸음
 export const START = new Vector3(0.6, 0, 1.0);
 
@@ -38,9 +43,12 @@ const KEYS = {
 };
 
 // 구역 안으로, 장애물 밖으로. 벽에 부딪히면 덜 파고든 쪽으로 밀어내서 벽을 따라 미끄러진다
-function resolve(p) {
+function resolve(p, open = false) {
   p.x = Math.min(AREA.maxX, Math.max(AREA.minX, p.x));
-  p.z = Math.min(AREA.maxZ, Math.max(AREA.minZ, p.z));
+  const inDoor = open && p.x > DOOR.minX && p.x < DOOR.maxX;
+  p.z = Math.min(inDoor ? DOOR.maxZ : AREA.maxZ, Math.max(AREA.minZ, p.z));
+  // 버스 안에서는 옆 벽을 뚫고 나가지 않게 문 폭 안에 둔다
+  if (p.z > CURB) p.x = Math.min(DOOR.maxX, Math.max(DOOR.minX, p.x));
   for (const [x1, x2, z1, z2] of BOXES) {
     const left = p.x - (x1 - BODY);
     const right = x2 + BODY - p.x;
@@ -68,19 +76,53 @@ function resolve(p) {
   return p;
 }
 
-export default function Walker({ active, me }) {
+export default function Walker({
+  active,
+  me,
+  doorOpen,
+  canEnter,
+  riding,
+  boardRequest,
+  onInBus,
+  onAtDoor,
+}) {
   const body = useRef(null);
   const ring = useRef(null);
   const target = useMemo(() => START.clone(), []);
   const held = useRef(new Set());
   const invalidate = useThree((state) => state.invalidate);
+  // useFrame 안에서 최신 props를 보려고 담아 둔다
+  const live = useRef({ doorOpen, canEnter, riding, onInBus, onAtDoor });
+  const was = useRef({ inBus: false, atDoor: false });
+  useEffect(() => {
+    live.current = { doorOpen, canEnter, riding, onInBus, onAtDoor };
+    invalidate();
+  });
 
   function walkTo(point) {
-    target.copy(resolve(new Vector3(point.x, 0, point.z)));
+    target.copy(resolve(new Vector3(point.x, 0, point.z), live.current.canEnter));
     ring.current.position.set(target.x, 0.08, target.z);
     ring.current.visible = true;
     invalidate();
   }
+
+  // "버스 타기"를 누르면 알아서 버스 안까지 걸어 들어간다
+  useEffect(() => {
+    if (boardRequest > 0) walkTo(BOARD_SPOT);
+    // walkTo는 매번 새로 만들어지지만 요청 번호가 바뀔 때만 걸어야 한다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boardRequest]);
+
+  // 카드를 찍으면 버스와 함께 떠나 화면에서 사라지고, 집에서 돌아오면 문 앞 인도에 다시 선다
+  useEffect(() => {
+    if (riding) return;
+    if (me.current.z > CURB) {
+      me.current.set(BOARD_SPOT.x, 0, OUT_SPOT_Z);
+      target.copy(me.current);
+      body.current.position.set(me.current.x, 0, me.current.z);
+    }
+    body.current.visible = true;
+  }, [riding, me, target]);
 
   // 키는 누르고 있는 동안만 걷는다. 입력칸에 쓰는 중이거나 정류장이 아닐 때는 듣지 않는다
   useEffect(() => {
@@ -111,6 +153,11 @@ export default function Walker({ active, me }) {
 
   useFrame(({ camera }, dt) => {
     const p = me.current;
+    const { canEnter: open, doorOpen: door, riding: away } = live.current;
+    if (away) {
+      body.current.visible = false; // 버스와 함께 떠났다
+      return;
+    }
     const step = SPEED * Math.min(dt, 1 / 30);
     const from = p.clone();
 
@@ -129,21 +176,36 @@ export default function Walker({ active, me }) {
         -Math.sin(yaw) * right - Math.cos(yaw) * forward,
       );
       p.addScaledVector(move.normalize(), step);
-      resolve(p);
+      resolve(p, open);
       target.copy(p); // 키로 걷기 시작하면 누른 곳 걷기는 그만
       ring.current.visible = false;
     } else {
       const to = target.clone().sub(p);
       const dist = to.length();
-      if (dist < 0.01) {
+      if (dist >= 0.01) {
+        p.addScaledVector(to, Math.min(dist, step) / dist);
+        resolve(p, open);
+      } else {
         ring.current.visible = false;
-        return;
       }
-      p.addScaledVector(to, Math.min(dist, step) / dist);
-      resolve(p);
       // 벽에 막혀 더 못 가면 거기서 멈춘다(제자리걸음으로 계속 그리지 않게)
       if (p.distanceToSquared(from) < 1e-8) target.copy(p);
     }
+
+    // 문이 닫혔는데(또는 탈 수 없는데) 버스 안이면 태우지 않고 문 앞 인도로 내려 준다
+    if (!open && p.z > CURB) {
+      p.set(Math.min(DOOR.maxX, Math.max(DOOR.minX, p.x)), 0, OUT_SPOT_Z);
+      target.copy(p);
+    }
+
+    // 버스 안에 들어왔는지·문 앞에 왔는지를 바뀔 때만 App에 알린다
+    const inBus = p.z > DOOR.inside;
+    if (inBus !== was.current.inBus) live.current.onInBus((was.current.inBus = inBus));
+    const atDoor = door && !open && p.z > 1.45 && p.x > 0 && p.x < 1.4;
+    if (atDoor && !was.current.atDoor) live.current.onAtDoor();
+    was.current.atDoor = atDoor;
+
+    if (p.distanceToSquared(from) < 1e-8) return; // 안 움직였으면 다시 그리지 않는다
 
     // 가는 쪽을 본다(가만히 있을 때 앞은 -z, 정류장 쪽). 걸음마다 아주 살짝 들썩인다
     const moved = p.clone().sub(from);

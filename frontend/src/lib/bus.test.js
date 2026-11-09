@@ -6,7 +6,13 @@ import { busAt, DWELL_MS, INTERVAL_MS } from "./bus.js";
 const ARRIVAL = Date.UTC(2026, 10, 9, 14, 5, 0);
 
 test("한국 시간 매시 5분 배수에 도착해 서 있다", () => {
-  assert.deepEqual(busAt(ARRIVAL), { phase: "stopped", arriveAt: ARRIVAL, minutes: 0 });
+  assert.deepEqual(busAt(ARRIVAL), {
+    phase: "stopped",
+    arriveAt: ARRIVAL,
+    minutes: 0,
+    doorOpen: false,
+    leavingSoon: false,
+  });
   assert.equal(busAt(ARRIVAL + DWELL_MS - 1).phase, "stopped");
 });
 
@@ -17,6 +23,16 @@ test("60초가 지나면 출발하고, 다음 버스까지 남은 분을 올림�
   assert.equal(left.minutes, 4);
   assert.equal(busAt(ARRIVAL + INTERVAL_MS - 1).minutes, 1); // 1밀리초 남아도 "1분"
   assert.equal(busAt(ARRIVAL + INTERVAL_MS - 60_001).minutes, 2);
+});
+
+test("서고 1.5초 뒤 문이 열리고, 떠나기 2초 전 닫히고, 10초 전부터 곧 출발", () => {
+  assert.equal(busAt(ARRIVAL + 1499).doorOpen, false);
+  assert.equal(busAt(ARRIVAL + 1500).doorOpen, true);
+  assert.equal(busAt(ARRIVAL + DWELL_MS - 2001).doorOpen, true);
+  assert.equal(busAt(ARRIVAL + DWELL_MS - 2000).doorOpen, false);
+  assert.equal(busAt(ARRIVAL + DWELL_MS - 10_001).leavingSoon, false);
+  assert.equal(busAt(ARRIVAL + DWELL_MS - 10_000).leavingSoon, true);
+  assert.equal(busAt(ARRIVAL + DWELL_MS).doorOpen, false);
 });
 
 test("누가 언제 보든 같은 시각엔 같은 버스", () => {

@@ -71,6 +71,58 @@
   cursor: pointer;
 }
 
+/* 버스 안에서만 켜진다. 꺼져 있을 땐 흐리게(꺼진 버튼은 대비 기준 예외지만 글자는 읽히게 0.55) */
+.stop__reader:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 버스 타기: 문이 열려 있는 동안만 뜨는 가장 눈에 띄는 버튼 */
+.stop__board {
+  align-self: center;
+  min-height: 44px;
+  margin: 12px 0 0;
+  padding: 10px 28px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--lamp-light);
+  color: var(--night-sky);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 문 앞 질문 */
+.stop__ask {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgb(31 42 68 / 92%);
+  text-align: center;
+}
+
+.stop__ask p {
+  flex-basis: 100%;
+  margin: 0 0 4px;
+  font-family: "Gowun Batang", serif;
+}
+
+.stop__ask button {
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid rgb(246 199 107 / 45%);
+  border-radius: 22px;
+  background: transparent;
+  color: var(--star-light);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
 .stop__reader:focus-visible {
   outline: 2px solid var(--lamp-light);
   outline-offset: 3px;

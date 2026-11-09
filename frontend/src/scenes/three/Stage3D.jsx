@@ -66,7 +66,7 @@ function fillTo300(stars) {
 }
 
 // 캔버스 안쪽(useFrame·useThree는 캔버스 안에서만 쓸 수 있어서 따로 둔다)
-function World({ up, stars, bus, debug, onSample, onPerf, onLookUp }) {
+function World({ up, stars, bus, ride, debug, onSample, onPerf, onLookUp }) {
   // 내 위치. 걷기(Walker)가 바꾸고 카메라(CameraRig)가 읽는다
   const me = useRef(START.clone());
   return (
@@ -76,16 +76,40 @@ function World({ up, stars, bus, debug, onSample, onPerf, onLookUp }) {
       <ambientLight color="#3a4a7a" intensity={0.6} />
       <StopModel />
       <StarField stars={stars} pitch={SKY_PITCH} />
-      <Walker active={!up} me={me} />
-      <Bus bus={bus} me={me} />
-      <CameraRig up={up} me={me} onLookUp={onLookUp} />
+      <Walker
+        active={!up && !ride.riding}
+        me={me}
+        doorOpen={bus.doorOpen}
+        canEnter={ride.canEnter}
+        riding={ride.riding}
+        boardRequest={ride.boardRequest}
+        onInBus={ride.onInBus}
+        onAtDoor={ride.onAtDoor}
+      />
+      <Bus bus={bus} me={me} riding={ride.riding} />
+      <CameraRig up={up} me={me} inBus={ride.boarded} onLookUp={onLookUp} />
       <PerfCheck onPerf={onPerf} debug={debug} />
       {debug && <FpsProbe onSample={onSample} />}
     </>
   );
 }
 
-export default function Stage3D({ scene, night, phase, bus, debug, onReady, onPerf, onLookUp }) {
+export default function Stage3D({
+  scene,
+  night,
+  phase,
+  bus,
+  canEnter,
+  boarded,
+  riding,
+  boardRequest,
+  onInBus,
+  onAtDoor,
+  debug,
+  onReady,
+  onPerf,
+  onLookUp,
+}) {
   const fpsText = useRef(null);
   function showFps(fps, worst) {
     fpsText.current.textContent = `${fps} fps · 가장 긴 프레임 ${worst}ms`;
@@ -112,6 +136,7 @@ export default function Stage3D({ scene, night, phase, bus, debug, onReady, onPe
           // 다른 사람 별은 2D처럼 의식이 끝난 뒤에만. 입력하는 동안 글자를 가리지 않게
           stars={phase === "done" ? stars : NO_STARS}
           bus={bus}
+          ride={{ canEnter, boarded, riding, boardRequest, onInBus, onAtDoor }}
           debug={debug}
           onSample={showFps}
           onPerf={onPerf}

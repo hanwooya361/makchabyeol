@@ -8,7 +8,6 @@ const STOP_X = 4.1; // 앞문이 정류장 앞(x 0.6)에 오는 자리
 const ROAD_Z = 3.15; // 연석(z 1.85) 바로 바깥 차도
 const DRIVE_MS = 6000; // 들어오는 데·떠나는 데 걸리는 시간
 const DRIVE_DIST = 45;
-const DOOR = { open: 1500, closeBefore: 2000 }; // 서고 1.5초 뒤 열리고, 떠나기 2초 전 닫힘
 
 function easeOut(t) {
   return 1 - (1 - t) ** 3;
@@ -21,16 +20,15 @@ function poseAt(now, arriveAt, dwellMs, intervalMs) {
     if (t >= -DRIVE_MS && t < 0) {
       return {
         x: STOP_X + DRIVE_DIST * (1 - easeOut((t + DRIVE_MS) / DRIVE_MS)),
-        open: false,
         moving: true,
       };
     }
     if (t >= 0 && t < dwellMs) {
-      return { x: STOP_X, open: t > DOOR.open && t < dwellMs - DOOR.closeBefore, moving: false };
+      return { x: STOP_X, moving: false };
     }
     if (t >= dwellMs && t < dwellMs + DRIVE_MS) {
       const k = (t - dwellMs) / DRIVE_MS;
-      return { x: STOP_X - DRIVE_DIST * k * k, open: false, moving: true };
+      return { x: STOP_X - DRIVE_DIST * k * k, moving: true };
     }
   }
   return null; // 지금은 버스가 없다
@@ -62,8 +60,15 @@ function Box({ position, size, material }) {
   );
 }
 
-export default function Bus({ bus, me }) {
+// 카드를 찍은 내 버스는 시간표를 기다리지 않고 그 자리에서 문을 닫고 바로 떠난다
+function departing(t) {
+  const k = t / DRIVE_MS;
+  return k < 1 ? { x: STOP_X - DRIVE_DIST * k * k, moving: true } : null;
+}
+
+export default function Bus({ bus, me, riding }) {
   const root = useRef(null);
+  const rideStart = useRef(0);
   const door = useRef(null);
   const invalidate = useThree((state) => state.invalidate);
 
@@ -73,12 +78,20 @@ export default function Bus({ bus, me }) {
     return () => clearInterval(id);
   }, [invalidate]);
 
+  useEffect(() => {
+    if (riding) rideStart.current = Date.now();
+  }, [riding]);
+
   useFrame(({ camera }) => {
-    const pose = poseAt(Date.now(), bus.arriveAt, bus.dwellMs, bus.intervalMs);
+    const now = Date.now();
+    const pose = riding
+      ? departing(now - rideStart.current)
+      : poseAt(now, bus.arriveAt, bus.dwellMs, bus.intervalMs);
     root.current.visible = Boolean(pose);
     if (!pose) return;
     root.current.position.x = pose.x;
-    door.current.visible = !pose.open; // 열리면 문짝이 사라지고 안쪽 불빛이 보인다
+    // 문은 시간표(App)가 정한다. 열리면 문짝이 사라지고 안쪽 불빛이 보인다
+    door.current.visible = riding || !bus.doorOpen;
 
     // 카메라가 버스 너머(차도 쪽)에서 정류장 쪽 캐릭터를 보면 버스가 가린다. 그때는 윤곽만 남게
     // 아주 옅게 하고 창문 불빛도 줄인다(화면 전체가 뿌옇게 덮이지 않게)

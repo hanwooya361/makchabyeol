@@ -39,12 +39,9 @@
   display: none;
 }
 
+/* 전광판 아래로 빈 공간을 밀어 넣어, 버스 타기·질문·카드·하늘 보기가 모두 아래에 모이게 */
 .stage[data-three="ready"] .stop__sign {
-  margin: 0;
-}
-
-.stage[data-three="ready"] .stop__reader {
-  margin-top: auto;
+  margin: 0 auto auto;
 }
 
 /* 정류장에서는 빈 곳을 누르면 아래 3D 바닥까지 닿게(걷기). 버튼·링크는 그대로 눌린다 */

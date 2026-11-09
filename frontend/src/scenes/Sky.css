@@ -141,6 +141,11 @@
   box-shadow: 0 0 10px 3px rgb(255 244 214 / 55%);
 }
 
+.sky__my-star.is-faint {
+  opacity: 0.45;
+  box-shadow: 0 0 6px 1px rgb(255 244 214 / 35%);
+}
+
 .is-releasing .sky__my-star {
   animation:
     sky-rise 1.5s 0.8s ease-out backwards,
