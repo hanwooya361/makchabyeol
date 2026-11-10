@@ -33,6 +33,7 @@ export default function Stop({
 }) {
   const reader = useRef(null);
   const skyLink = useRef(null);
+  const askFirst = useRef(null);
   const wasInert = useRef(inert);
 
   // 하늘에서 돌아오면 포커스를 단말기로. 안 그러면 inert가 된 하늘에서 포커스가 사라져 맨 앞으로 튄다.
@@ -45,6 +46,13 @@ export default function Stop({
     }
     wasInert.current = inert;
   }, [inert]);
+
+  // 누른 버튼이 사라지면(버스 타기 → 질문, 버스 타기 → 탑승) 포커스가 body로 떨어져 스크린리더가 길을 잃는다.
+  // 떨어졌을 때만 다음 할 일로 옮긴다. 다른 곳에 포커스가 있으면 뺏지 않는다
+  useEffect(() => {
+    if (inert || document.activeElement !== document.body) return;
+    (asking ? askFirst : reader).current?.focus({ preventScroll: true });
+  }, [asking, boarded, inert]);
 
   return (
     <section className="scene scene--stop" inert={inert}>
@@ -116,7 +124,7 @@ export default function Stop({
       {asking && (
         <div className="stop__ask" role="group" aria-labelledby="stop-ask">
           <p id="stop-ask">걱정 하나 맡기고 갈래요?</p>
-          <button type="button" onClick={() => onAnswer("worry")}>
+          <button type="button" ref={askFirst} onClick={() => onAnswer("worry")}>
             맡기고 갈래요
           </button>
           <button type="button" onClick={() => onAnswer("none")}>
