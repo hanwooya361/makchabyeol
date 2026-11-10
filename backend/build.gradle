@@ -24,7 +24,6 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 
-    runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -41,4 +40,6 @@ tasks.named('jar') {
 
 tasks.named('test') {
     useJUnitPlatform()
+    // 개발 DB 대신 테스트 DB(makchabyeol_test)를 쓴다. 먼저 `docker compose up -d`
+    systemProperty 'spring.profiles.active', 'test'
 }

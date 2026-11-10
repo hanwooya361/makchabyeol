@@ -450,7 +450,7 @@ makchabyeol/
 | VITE_API_BASE_URL | 프론트 | `http://localhost:8080` | API 주소 |
 | VITE_DONATION_URL | 프론트 | (비워 두면 후원 링크 숨김) | 외부 후원 링크 |
 | VITE_SITE_URL | 프론트 | `https://makchabyeol.<계정>.workers.dev` | og:image 전체 주소용. 빌드 때 박힘 |
-| SPRING_PROFILES_ACTIVE | 백엔드 | `local` / `prod` | local은 H2 메모리 DB |
+| SPRING_PROFILES_ACTIVE | 백엔드 | `local` / `test` / `prod` | local은 docker compose PostgreSQL(5433/makchabyeol), test는 같은 컨테이너의 makchabyeol_test(gradle test가 자동 지정) |
 | DATABASE_URL | 백엔드 | `jdbc:postgresql://<host>/<db>?sslmode=require` | prod 전용 |
 | DATABASE_USERNAME | 백엔드 | | prod 전용 |
 | DATABASE_PASSWORD | 백엔드 | | prod 전용 |
@@ -519,7 +519,7 @@ T01~T16은 완료됐어요(2D 의식 + 백엔드 + 배포 설정 + 출시 점검
 
 | 단계 | 티켓 | 완료 조건 | 먼저 끝나야 하는 것 | 난이도 | 예상 |
 | --- | --- | --- | --- | --- | --- |
-| 0 기반 | T24 로컬 DB를 PostgreSQL로 | 루트 `docker-compose.yml`로 PostgreSQL 16 실행(호스트 포트는 WMS 컨테이너와 안 겹치게, 기본안 5433), `local` 프로필이 그 DB를 씀, 테스트는 Testcontainers로 PostgreSQL에서 돎(CI도 그대로), H2 의존성 제거, Flyway V1이 PostgreSQL에서 통과, README 실행 방법 수정 | T23 | 하~중 | 1일 |
+| 0 기반 | T24 로컬 DB를 PostgreSQL로 | (완료) 루트 `docker-compose.yml`로 PostgreSQL 16 실행(프로젝트·컨테이너·볼륨 이름 makchabyeol, `127.0.0.1:5433`. 5432는 AIOps, 3307은 WMS), `local` 프로필이 그 DB를 씀, 테스트는 같은 컨테이너의 `makchabyeol_test`(CI는 같은 주소로 서비스 컨테이너), H2 의존성 제거, Flyway V1이 PostgreSQL에서 통과, README 실행 방법 수정 | T23 | 하~중 | 1일 |
 | 1 분위기 | T29 실제 시간대 하늘 | `lib/timeOfDay.js`(테스트: 시각 → 해 질 녘·밤·새벽, 경계에서 섞기). 3D 하늘·빛 색만, 서버 없음. 시간대별로 글자 대비 4.5:1 실측. 낮엔 해 질 녘에 머묾 | T24 | 하 | 1일 |
 | 1 분위기 | T30 버스 창밖 | 카드 후 약 10초 달리기 + 창밖 가로등이 지나감, "건너뛰기"(포커스), 모션 줄이기·2D는 바로 집. 서버 응답 안 기다림. 30fps | T24 | 중 | 2일 |
 | 1 분위기 | T31 환경음 | 지지직·먼 차 소리 반복, HTML 켜기 버튼, 기본 꺼짐·기기 기억, 첫 사용자 동작 뒤에만 재생(브라우저 자동 재생 규칙), 비 소리 파일은 준비만. credits.md | T24 | 하~중 | 1~2일 |

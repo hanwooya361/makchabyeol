@@ -14,7 +14,7 @@
 
 ## 로컬 실행
 
-필요한 것: Node.js 20 이상, JDK 21
+필요한 것: Node.js 20 이상, JDK 21, Docker Desktop(로컬 DB·커밋 훅)
 
 ### 프론트엔드
 
@@ -26,6 +26,14 @@ npm run dev
 
 http://localhost:5173 에서 "막차까지 ∞분" 화면이 보이면 성공이에요.
 
+### DB (PostgreSQL)
+
+```bash
+docker compose up -d     # 저장소 루트에서. 컨테이너 makchabyeol-postgres, 이 PC의 5433 포트
+```
+
+`docker ps`에 `makchabyeol-postgres ... 127.0.0.1:5433->5432 (healthy)`가 보이면 돼요. 이 PC의 5432는 다른 프로젝트가 쓰고 있어서 5433을 써요. 처음 뜰 때 개발용 `makchabyeol`과 테스트용 `makchabyeol_test` 두 DB가 생겨요(비밀번호는 `docker-compose.yml`의 개발 전용 값). 데이터를 싹 지우고 다시 시작하려면 `docker compose down -v`.
+
 ### 백엔드
 
 ```bash
@@ -33,9 +41,9 @@ cd backend
 ./gradlew bootRun        # Windows: gradlew.bat bootRun
 ```
 
-http://localhost:8080/api/health 에서 `{"status":"UP"}`가 보이면 성공이에요. 로컬에서는 H2 메모리 DB를 쓰기 때문에 따로 설치할 DB가 없어요.
+http://localhost:8080/api/health 에서 `{"status":"UP"}`가 보이면 성공이에요. DB 컨테이너가 먼저 떠 있어야 해요.
 
-테스트: `./gradlew test`
+테스트: `./gradlew test` (테스트용 DB `makchabyeol_test`를 써서 개발 데이터는 건드리지 않아요)
 
 ## 비밀값 검사 훅 (클론한 뒤 한 번)
 

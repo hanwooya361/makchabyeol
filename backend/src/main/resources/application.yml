@@ -6,8 +6,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      # 스키마 주인은 Flyway 하나다. H2는 기본값이 create-drop이라 명시하지 않으면
-      # Hibernate가 Flyway가 만든 테이블을 갈아엎는다
+      # 스키마 주인은 Flyway 하나다. Hibernate는 엔티티와 테이블이 맞는지 확인만 한다
       ddl-auto: validate
 
 server:
@@ -21,21 +20,31 @@ app:
   allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
 
 ---
-# 로컬 개발: H2 메모리 DB (PostgreSQL 호환 모드). 서버를 끄면 데이터가 사라진다.
+# 로컬 개발: 저장소 루트 docker-compose.yml의 PostgreSQL(5433). 먼저 `docker compose up -d`
+# 비밀번호는 docker-compose.yml과 같은 개발 전용 값이다(운영 값 아님)
 spring:
   config:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:h2:mem:makchabyeol;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
+    url: jdbc:postgresql://localhost:5433/makchabyeol
+    username: makchabyeol
+    password: makchabyeol-dev
 
 ---
-# 배포: Neon PostgreSQL. 접속 정보는 환경변수로만 받는다.
+# 테스트: 같은 컨테이너의 별도 DB(makchabyeol_test). gradle test가 이 프로필로 돈다(build.gradle)
+# CI도 같은 주소로 PostgreSQL 서비스 컨테이너를 띄운다(.github/workflows/ci.yml)
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:postgresql://localhost:5433/makchabyeol_test
+    username: makchabyeol
+    password: makchabyeol-dev
+
+---
+# 배포: 운영 PostgreSQL(공개 출시 때 AWS). 접속 정보는 환경변수로만 받는다.
 spring:
   config:
     activate:

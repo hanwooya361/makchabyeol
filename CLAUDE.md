@@ -39,7 +39,7 @@
 ## 기술 스택 (2026-11-07 확정, 2026-11-10 개발·배포 방식 변경)
 - 프론트: React 19 + Vite (JavaScript), 정적 호스팅. 린트 oxlint, 포맷 Prettier
 - 백엔드: Spring Boot 3.5 + Java 21 + Gradle. 기능별 패키지(star, cardtap, crisis, common, config)
-- DB: PostgreSQL. 로컬은 프로젝트 루트 `docker-compose.yml`의 PostgreSQL(T24부터, H2 제거), 테스트도 PostgreSQL(Testcontainers)
+- DB: PostgreSQL. 로컬은 프로젝트 루트 `docker-compose.yml`의 PostgreSQL(T24부터, H2 제거), 테스트도 같은 컨테이너의 `makchabyeol_test` DB(포트 5433, `test` 프로필). 이 PC의 5432(AIOps)·3307(WMS)은 다른 프로젝트 것이라 건드리지 않음
 - 개발·배포 (2026-11-10 변경): 공개 출시 범위의 기능이 다 끝날 때까지 **로컬에서만** 개발. 공개 출시 때 **AWS로 한 번에 배포**(T46, 사용자가 직접 진행, Claude는 문서·설정 검토). GitHub Actions는 검사(린트·포맷·테스트·빌드)용
 - T14의 Render·Cloudflare·Neon 배포 설정(`wrangler.jsonc`, `backend/Dockerfile`, ci.yml의 deploy 작업)은 지우지 않고 대체 경로로 남겨 둠
 - 프론트와 API·WebSocket은 같은 주소에서 경로로 나눈다(`/api/*`·`/ws`). 로컬은 Vite 프록시. 로그인 쿠키 때문(T36)
