@@ -27,17 +27,19 @@
 - 예외: 모든 장면에 걸리는 공통 UI(푸터, 위기 안내 카드)는 `scenes/` 밖(`App.jsx`·`components/`)에 두고 3D에서도 HTML로 유지함. 캔버스 안에는 DOM이 없어서 스크린리더·글자 크기 조절이 안 먹음
 - 비용: 월 고정비 0~1만원 안에서 운영 가능한 스택
 
-## 기술 스택 (2026-11-07 확정)
+## 기술 스택 (2026-11-07 확정, 2026-11-10 개발·배포 방식 변경)
 - 프론트: React 19 + Vite (JavaScript), 정적 호스팅. 린트 oxlint, 포맷 Prettier
 - 백엔드: Spring Boot 3.5 + Java 21 + Gradle. 기능별 패키지(star, cardtap, crisis, common, config)
-- DB: PostgreSQL (배포: Neon 무료), 로컬은 H2 메모리 DB(PostgreSQL 모드)
-- 배포: 프론트 Cloudflare Workers 정적 자산(T14에서 확정. Vercel Hobby는 비상업 제한), 백엔드 Render 무료(Docker) → 후원이 모이면 상시 가동 인스턴스로. main 푸시 → GitHub Actions 검사 통과 시에만 배포
-- 서버가 잠들어 있어도(Render 무료) 장면과 의식은 서버 응답을 기다리지 않게 만든다
+- DB: PostgreSQL. 로컬은 프로젝트 루트 `docker-compose.yml`의 PostgreSQL(T24부터, H2 제거), 테스트도 PostgreSQL(Testcontainers)
+- 개발·배포 (2026-11-10 변경): 공개 출시 범위의 기능이 다 끝날 때까지 **로컬에서만** 개발. 공개 출시 때 **AWS로 한 번에 배포**(T46, 사용자가 직접 진행, Claude는 문서·설정 검토). GitHub Actions는 검사(린트·포맷·테스트·빌드)용
+- T14의 Render·Cloudflare·Neon 배포 설정(`wrangler.jsonc`, `backend/Dockerfile`, ci.yml의 deploy 작업)은 지우지 않고 대체 경로로 남겨 둠
+- 프론트와 API·WebSocket은 같은 주소에서 경로로 나눈다(`/api/*`·`/ws`). 로컬은 Vite 프록시. 로그인 쿠키 때문(T36)
+- 서버가 늦거나 꺼져 있어도 장면과 의식은 서버 응답을 기다리지 않게 만든다
 
 ## 참고 문서
 - docs/prd.md: 기능, 수용 기준(Given/When/Then), 비목표. 원본은 Claude 문서이며 이 파일은 개발용 사본
 - docs/screen-design.md: 화면 흐름, 카피, 애니메이션 시간, 팔레트, 접근성
-- docs/tech-design.md: ERD, API 명세, 보안, 폴더 구조, 환경변수, 티켓(T01~T23)과 완료 조건, 3D 장면 계획과 완료 조건(8장)
+- docs/tech-design.md: ERD, API 명세, 보안, 폴더 구조, 환경변수, 티켓(T01~T46, 7장 "공개 출시까지" 표가 작업 순서)과 완료 조건, 3D 장면 계획과 완료 조건(8장)
 - 작업 전에 관련 문서를 읽고, 설계와 코드가 어긋나면 고치기 전에 먼저 알려줌
 
 ## 작업 방식
@@ -49,5 +51,6 @@
 ## 실행 명령
 - 프론트: `cd frontend && npm install && npm run dev` (http://localhost:5173)
 - 프론트 점검: `npm run lint`, `npm run format:check`, `npm run build`
+- DB(T24부터): 루트에서 `docker compose up -d` (Docker Desktop 실행 필요)
 - 백엔드: `cd backend && ./gradlew bootRun` (Windows: `gradlew.bat bootRun`), 확인 http://localhost:8080/api/health
-- 백엔드 테스트: `./gradlew test`
+- 백엔드 테스트: `./gradlew test` (T24부터 Docker Desktop이 켜져 있어야 함)
