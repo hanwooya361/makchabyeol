@@ -37,9 +37,27 @@ http://localhost:8080/api/health 에서 `{"status":"UP"}`가 보이면 성공이
 
 테스트: `./gradlew test`
 
+## 비밀값 검사 훅 (클론한 뒤 한 번)
+
+이 저장소는 public이에요. 커밋할 때마다 [gitleaks](https://github.com/gitleaks/gitleaks)가 스테이징된 변경을 검사해서, 비밀번호·토큰·API 키처럼 보이는 게 있으면 커밋을 막아요. gitleaks는 설치하지 않고 Docker 이미지로 돌려요.
+
+```bash
+git config core.hooksPath .githooks   # 저장소 안의 .githooks/pre-commit을 쓰게 함
+```
+
+- Docker Desktop이 켜져 있어야 커밋돼요. 꺼져 있으면 훅이 이유를 말하고 막아요
+- 걸리면 파일·줄이 나오고 값은 `REDACTED`로 가려져요. 그 값을 환경변수로 옮긴 뒤 다시 커밋해요
+- 푸시 전에 기록 전체를 한 번 더 검사해요(Git Bash 기준, 저장소 루트에서)
+
+```bash
+MSYS_NO_PATHCONV=1 docker run --rm -v "$(pwd -W):/repo" ghcr.io/gitleaks/gitleaks:v8.21.2 git /repo --redact --no-banner
+```
+
 ## 환경변수
 
 `.env.example`을 참고하세요. 프론트 변수는 `frontend/.env.local`에, 백엔드 변수는 실행 환경(IDE 실행 설정 또는 배포 플랫폼)에 넣어요. 실제 값이 든 파일은 커밋하지 않아요.
+
+**`VITE_`로 시작하는 프론트 변수는 빌드 결과(JS·HTML)에 그대로 들어가서 누구나 볼 수 있어요.** 그래서 공개해도 되는 값(API 주소, 사이트 주소, 후원 링크)만 둬요. 기상청 API 키·웹훅 주소·DB 비밀번호 같은 비밀은 **백엔드 환경변수로만** 받아요.
 
 ## 배포
 

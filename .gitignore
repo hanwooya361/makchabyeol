@@ -1,7 +1,15 @@
-# 환경변수
+# 환경변수·비밀값 (예시 파일만 커밋)
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# 로컬 DB 데이터 (docker compose가 폴더에 저장할 때)
+.data/
+pgdata/
 
 # 프론트엔드
 node_modules/
@@ -19,6 +27,9 @@ bin/
 *.iml
 .vscode/
 out/
+
+# gitleaks 보고서
+gitleaks-report.*
 
 # OS
 .DS_Store

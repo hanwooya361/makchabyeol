@@ -1,5 +1,6 @@
-# PR과 main 푸시마다 검사한다. main에서 전부 통과해야만 배포된다:
-# 프론트는 아래 deploy-frontend가 올리고, 백엔드는 Render가 "After CI Checks Pass"로 스스로 배포한다.
+# PR과 main 푸시마다 린트·포맷·테스트·빌드를 검사한다.
+# 배포는 지금 하지 않는다(로컬 개발 기간, 공개 출시 때 AWS로. docs/tech-design.md 7장).
+# 아래 deploy-frontend(Cloudflare)는 대체 경로로 설정만 남겨 두고 꺼 뒀다.
 name: CI
 
 on:
@@ -50,7 +51,8 @@ jobs:
 
   deploy-frontend:
     needs: [frontend, backend]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # 꺼 둠: Cloudflare 비밀값이 없어 실패로 표시된다. AWS 배포(T46) 때 다시 정리. 켜려면 false && 를 지운다
+    if: false && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
       run:

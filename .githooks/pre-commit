@@ -1,0 +1,19 @@
+#!/bin/sh
+# 커밋 직전에 스테이징된 변경만 gitleaks로 검사하고, 비밀값이 보이면 커밋을 막는다.
+# gitleaks를 PC에 설치하지 않고 Docker 이미지로 돌린다(버전 고정). 설치: README "비밀값 검사 훅"
+IMAGE=ghcr.io/gitleaks/gitleaks:v8.21.2
+
+if ! docker info >/dev/null 2>&1; then
+  echo "pre-commit: Docker가 꺼져 있어 비밀값 검사를 못 했어요. Docker Desktop을 켜고 다시 커밋해 주세요." >&2
+  exit 1
+fi
+
+# Git Bash(Windows)에서는 Docker에 C:/... 경로를 넘겨야 해서 pwd -W, 그 밖에서는 pwd
+ROOT=$(cd "$(git rev-parse --show-toplevel)" && (pwd -W 2>/dev/null || pwd))
+
+# -v: 걸린 파일·줄을 보여 주고, --redact: 값 자체는 가린다
+if ! MSYS_NO_PATHCONV=1 docker run --rm -v "$ROOT:/repo" "$IMAGE" \
+  git --pre-commit --staged --redact -v --no-banner /repo; then
+  echo "pre-commit: 비밀값으로 보이는 내용이 있어 커밋을 막았어요. 위 파일·줄을 확인하고 환경변수로 옮겨 주세요." >&2
+  exit 1
+fi
